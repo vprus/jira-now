@@ -28,3 +28,8 @@
   content: "";
   padding: 0;
 }
+
+body {
+    /* Leave space for Bootstrap navigation bar. */
+    padding-top: 40px;
+}
