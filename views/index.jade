@@ -4,15 +4,13 @@ block body
 
   div(ng-controller='AppCtrl').container
 
-    div.navbar.navbar-fixed-top.navbar-inverse
+    div.navbar.navbar-fixed-top.navbar-inverse(data-bs-navbar)
       div.navbar-inner
        div.container
          ul.nav
-           li
-             a(href='#') Home
-           li
+           li(data-match-route='/view1')
              a(href='/view1') View 1
-           li
+           li(data-match-route='/view2')
              a(href='/view2') View 2
 
           ul.nav.pull-right
@@ -28,9 +26,10 @@ block body
       | Angular seed app: v
       span(app-version)
 
-  script(src='angular/angular.js')
   script(src='http://code.jquery.com/jquery-latest.js')
+  script(src='angular/angular.js')  
   script(src='bootstrap/js/bootstrap.js')
+  script(src='angularstrap/angular-strap.min.js')
   script(src='app/js/app.js')
   script(src='app/js/services.js')
   script(src='app/js/controllers.js')
