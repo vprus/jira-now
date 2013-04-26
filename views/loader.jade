@@ -1,0 +1,32 @@
+
+-# Makes the 'loading' message appear until we load the key data,
+-# and delays loading of ng-view and any view controllers until
+-# we are ready.
+-# Alternative would be to carefully write individual controllers
+-# to wait for everything to load, but there's little point in
+-# such complexity.
+
+extends layout
+
+block body
+
+  div(ng-controller='AppController').container
+      
+    div(ng-switch="loaded")
+       div(ng-switch-when="0").loading
+           h1 Loading, please wait
+       div(ng-switch-when="1").ng-cloak
+           block content
+
+  script(src='http://code.jquery.com/jquery-latest.js')
+  script(src='angular/angular.js')
+  script(src='angular/angular-resource.js')
+  script(src='bootstrap/js/bootstrap.js')
+  script(src='angularstrap/angular-strap.min.js')
+  script(src='chart/Chart.min.js')
+  script(src='app/js/app.js')
+  script(src='app/js/services.js')
+  script(src='app/js/controllers.js')
+  script(src='app/js/filters.js')
+  script(src='app/js/directives.js')
+  script(src='app/js/moment.min.js')

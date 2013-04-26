@@ -1,0 +1,51 @@
+div(ng-controller='WeekController')
+
+  div.row
+    //div.span2
+     div.btn-toolbar
+      div.btn-group
+       p Since
+       button.btn.dropdown-toggle(data-toggle='dropdown') Last IDE call 
+         span.caret
+       ul.dropdown-menu
+         li
+           a(href='#') Last IDE call
+         li
+           a(href='#') Week start
+         li
+           a(href='#') Sprint start
+
+    div.span12
+    //- p.span12.pagination-centered
+    //-   b Select user
+    ul.nav.nav-pills.pull-right.user-list
+      li(ng-repeat="user in users")(ng-class="{active: selectedUsers[user] == true}")
+        a(ng-click="select(user)") {{user}}
+
+  
+  div.span12      
+
+   div.person
+      p {{fullName}}
+      p Since {{since | date:'MMM d H:mm'}}
+
+   div.counter
+      strong {{workedSeconds|formatHours}}
+      p hours
+
+   div.counter
+      strong {{workedIssues}}
+      p issues
+
+  div(ng-repeat="issue in issues | filter:issueFilter").span12
+
+    b {{issue.key}}: {{issue.summary}}
+
+    ul
+      li(ng-repeat="log in issue.log | filter:logFilter") 
+          span(ng-show="log.timeSpentSeconds")          
+            b {{log.timeSpentSeconds|formatDuration}} 
+            |  ({{log.date | date:'MMM d'}}) 
+          | {{log.comment}}
+
+  // button.btn.btn-primary Copy

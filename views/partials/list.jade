@@ -1,0 +1,37 @@
+div(ng-controller='ListController')
+
+  h1 {{name}}
+  canvas(style='float: right', id='workload', width='800', height='300', data-bar-chart="counts")
+
+  //div.span12      
+
+   div.person
+      p {{name}}
+
+   div.counter
+      strong {{10}}
+      p blockers
+
+   div.counter
+      strong {{11}}
+      p critical
+     
+  table.table
+    thead   
+      tr
+        th Issue
+        th Priority
+        th Updated
+        th Assignee
+    tbody     
+      tr(ng-repeat='issue in issues')
+        td 
+          a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}: 
+          {{issue.fields.summary}}
+        td 
+           img(src='{{issue.fields.priority.iconUrl}}')
+        td {{issue.fields.updated | ago}} 
+        td {{issue.fields.assignee.name}}
+
+
+  

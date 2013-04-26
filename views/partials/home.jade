@@ -1,0 +1,32 @@
+h1 Jira Now 
+  small Useful dashboard
+
+
+div.alert
+  strong 
+    | Please make no comments, public or private, about the shown data, except
+    | to dashboard's owner.
+
+  p 
+    | While the numers seem like numbers, they only make sense in context of
+    | specific team and process. Even more importantly, they have value only
+    | if not biased. Single comment from management, even in jest, can make
+    | all of this dashboard no longer good for anything.
+
+h2 Overview
+
+p This web applications holds onto a local copy of Jira issue and presents it
+  | in various ways. The right of navigation bar tells when last sync was
+  | performed and you can click to force a new sync.
+
+p Everything else should be self-explanatory.
+
+h2 Caveats
+
+ul
+
+  li Sync of issues from Jira updates the database, but not the views. Please
+    | reload manually
+
+  li Synchronization is not instant, so there may be small inconsistencies
+
