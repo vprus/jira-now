@@ -1,8 +1,4 @@
 
-/**
- * Module dependencies.
- */
-
 var express = require('express'),
   routes = require('./routes'),
   api = require('./routes/api');
@@ -12,6 +8,7 @@ var app = module.exports = express();
 // Configuration
 
 app.configure(function(){
+  app.engine('jade', require('jade').__express);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.bodyParser());
@@ -28,19 +25,24 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
-// Routes
-
+// Routes for HTML pages
 app.get('/', routes.index);
 app.get('/partials/:name', routes.partials);
 
-// JSON API
+// Before doing any API calls, do some basic checks
+app.get('/api/*', api.check)
+app.post('/api/*', api.check)
 
-app.get('/api/name', api.name);
+// Actual API calls
+app.get('/api/status', api.status);
+app.get('/api/clientConfig', api.clientConfig);
+app.get('/api/changes', api.changes)
+app.get('/api/list', api.list)
 
-// redirect all others to the index (HTML5 history)
+app.post('/api/update', api.update)
+
+// Everything else goes to index.
 app.get('*', routes.index);
-
-// Start server
 
 app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);

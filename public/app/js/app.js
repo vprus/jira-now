@@ -1,11 +1,13 @@
 'use strict';
 
-
-// Declare app level module which depends on filters, and services
-angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', "$strap.directives"]).
-  config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-    $routeProvider.when('/view1', {templateUrl: 'partials/partial1', controller: MyCtrl1});
-    $routeProvider.when('/view2', {templateUrl: 'partials/partial2', controller: MyCtrl2});
-    $routeProvider.otherwise({redirectTo: '/view1'});
-    $locationProvider.html5Mode(true);
-  }]);
+angular.module('jiraNow', ['jiraNow.filters', 'jiraNow.services', 'jiraNow.directives', 'developmentProcess', "$strap.directives"])
+    .config(
+        ['$routeProvider', function($routeProvider) {
+            console.log("Init router");
+            $routeProvider.when('/home', {templateUrl: 'partials/home.jade'});
+            $routeProvider.when('/list/:listId', {templateUrl: 'partials/list.jade'});
+            $routeProvider.when('/burndown', {templateUrl: 'partials/burndown.jade'});
+            $routeProvider.when('/week/since/:since', {templateUrl: 'partials/week.jade'});
+            $routeProvider.otherwise({redirectTo: '/home'});
+        }])
+     ;

@@ -1,7 +1,7 @@
 div(ng-controller='ListController')
 
   h1 {{name}}
-  canvas(style='float: right', id='workload', width='800', height='300', data-bar-chart="counts")
+  //canvas(style='float: right', id='workload', width='800', height='300', data-bar-chart="counts")
 
   //div.span12      
 
@@ -16,13 +16,13 @@ div(ng-controller='ListController')
       strong {{11}}
       p critical
      
-  table.table
+  table.table(ng-class='{disabled: updating == 1 || updatingList == 1}')
     thead   
       tr
         th Issue
         th Priority
         th Updated
-        th Assignee
+        //th Assignee
     tbody     
       tr(ng-repeat='issue in issues')
         td 
@@ -31,7 +31,7 @@ div(ng-controller='ListController')
         td 
            img(src='{{issue.fields.priority.iconUrl}}')
         td {{issue.fields.updated | ago}} 
-        td {{issue.fields.assignee.name}}
+        //td {{issue.fields.assignee.name}}
 
 
   

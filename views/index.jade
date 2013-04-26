@@ -1,37 +1,43 @@
-extends layout
+extends loader
 
-block body
-
-  div(ng-controller='AppCtrl').container
+block content
 
     div.navbar.navbar-fixed-top.navbar-inverse(data-bs-navbar)
       div.navbar-inner
-       div.container
+       div.container      
          ul.nav
-           li(data-match-route='/view1')
-             a(href='/view1') View 1
-           li(data-match-route='/view2')
-             a(href='/view2') View 2
+           li(data-match-route='/home')
+             a(href='#/home') Home
+           li.dropdown(data-match-route='/list/.*')
+             a(href='#', data-toggle='dropdown').dropdown-toggle Lists 
+               b.caret
+             ul.dropdown-menu             
+               li(ng-repeat='list in clientConfig.lists')
+                 a(href='#/list/{{list.id}}') {{list.name}}
+           li.dropdown(data-match-route='/week/.*')
+             a(href='#', data-toggle='dropdown').dropdown-toggle Week 
+               b.caret
+             ul.dropdown-menu               
+               li 
+                 a(href='#/week/since/{{monday.toISOString()}}') Since Monday ({{monday | date: 'MMM d'}})
+               li
+                 a(href='#/week/since/{{teamCall.toISOString()}}') Since Team Call ({{teamCall | date: 'MMM d'}})
+               li.divider
+               li 
+                 a(href='#/week/since/{{previousMonday.toISOString()}}') Since Previous Monday ({{previousMonday | date: 'MMM d'}})
+               li
+                 a(href='#/week/since/{{previousTeamCall.toISOString()}}') Since Previous Team Call ({{previousTeamCall | date: 'MMM d'}})
+
+
 
           ul.nav.pull-right
-           li
-             a(href='#') Status
+           li 
+             a(digester='1000', context='meta', ng-click='$parent.updateIssues()') {{$parent.updatedLabel()}}
 
-    div(ng-controller='AppCtrl')
-      h2 Hello {{name}}
+       div.container.alert-top(ng-show='error').ng-cloak
+        div.row
+          div.span12
+            button(type='button', class='close icon-white', data-dismiss='alert') &times;
+            span {{error}}
 
-      div(ng-view)
-
-    div
-      | Angular seed app: v
-      span(app-version)
-
-  script(src='http://code.jquery.com/jquery-latest.js')
-  script(src='angular/angular.js')  
-  script(src='bootstrap/js/bootstrap.js')
-  script(src='angularstrap/angular-strap.min.js')
-  script(src='app/js/app.js')
-  script(src='app/js/services.js')
-  script(src='app/js/controllers.js')
-  script(src='app/js/filters.js')
-  script(src='app/js/directives.js')
+    div(ng-view)
