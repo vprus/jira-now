@@ -15,6 +15,12 @@ div(ng-controller='ListController')
    div.counter
       strong {{11}}
       p critical
+
+  div.list-users  
+    a(ng-click="userClicked('all')", ng-class="userListClass('all')")
+      span.badge.badge-success all {{issues.length}}
+    a(ng-repeat="entry in counts", ng-click="userClicked(entry.name)", ng-class="userListClass(entry.name)")
+      span.badge.badge-success {{entry.name}} {{entry.count}}
      
   table.table(ng-class='{disabled: updating == 1 || updatingList == 1}')
     thead   
@@ -24,7 +30,7 @@ div(ng-controller='ListController')
         th Updated
         //th Assignee
     tbody     
-      tr(ng-repeat='issue in issues')
+      tr(ng-repeat='issue in issues | filter:issueFilter')
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}: 
           {{issue.fields.summary}}

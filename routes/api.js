@@ -155,18 +155,22 @@ exports.update = function(req, res) {
         console.log("Sync of issues since " + jiraDate + " in timezone of '" + config.jira.user + "'");
         since = '"' + jiraDateString + '"';
     }
+    
+    function updateAllChanged(callback) {
+        var query = "project in (" + config.jira.projects.join(',') + ") and updated>" + since;
+        queryAndSaveIssues(query, callback);
+    }
+
+    function updateListFactory(list) {
+        return function(callback) {
+            queryAndSaveList(list.id, list.query, callback);            
+        }
+    }
+
+    var tasks = [updateAllChanged].concat(config.lists.map(updateListFactory))
 
     async.series(
-        [
-            function(callback) {
-                var query = "project in (" + config.jira.projects.join(',') + ") and updated>" + since;
-                queryAndSaveIssues(query, callback);
-            },
-            function(callback) {
-                var query = 'filter = "2013.05 CB" and priority in (blocker, critical)';
-                queryAndSaveList("2013-05-cb", query, callback);
-            }
-        ],
+        tasks,
         function(error, results) {
             if (error) {
                 res.send(500, error);
@@ -298,6 +302,7 @@ exports.list = function(req, res) {
             res.send(500, error);
         } else {
 
+            // FIXME: apparently, document can be null now. Act property.
             document.issues.sort(function(a, b) { return a.fields.priority.id - b.fields.priority.id; })
             res.send(document.issues);
         }

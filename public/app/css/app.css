@@ -131,3 +131,14 @@ body {
     opacity: 0.5;
     pointer-events: none;
 }
+
+.list-users > a {
+    margin: 5px;
+    padding-bottom: 3px;
+}
+
+.list-users > a.active {
+    border-bottom: solid;
+    border-bottom-color: #0088cc;
+    border-bottom-width: 3px;
+}

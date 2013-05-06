@@ -128,6 +128,8 @@ function ListController($scope, $routeParams, List)
 {
     console.log("List Controller: " + $routeParams.listId)
 
+    $scope.selectedUsers = {};
+
     for (var i = 0; i < $scope.clientConfig.lists.length; ++i) {
         var list = $scope.clientConfig.lists[i];
         if (list.id == $routeParams.listId) {
@@ -150,25 +152,41 @@ function ListController($scope, $routeParams, List)
         });
         console.log("users " + JSON.stringify(users, null, 4));
 
+        function realName(name) {
+            var rn;
+            if (name in $scope.clientConfig.users) {
+                rn = $scope.clientConfig.users[name];
+            } else {
+                rn = "Jira User";
+            }
+            return name;
+            return rn.split(' ').map(function (n) { return n[0] + '.';}).join('');
+        }
+
         var usersList = []
         for (name in users) {
-            usersList.push({name: name, count: users[name]});
+            usersList.push({name: realName(name), count: users[name]});
         }
-        usersList.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        usersList.sort(function(a, b) { 
+            //return a.name.localeCompare(b.name); 
+            return b.count - a.count;
+        });
+
+        return usersList;
 
         //data.labels = usersList.map(function(a) { return a.name; });
         //data.datasets[0].data = usersList.map(function(a) { return a.count; });
 
-        return {
-	    labels : usersList.map(function(a) { return a.name; }), //["January","February","March","April","May","June","July"],
-	    datasets : [
-	        {
-		    fillColor : "rgba(151,187,205,0.5)",
-		    strokeColor : "rgba(151,187,205,1)",
-		    data: usersList.map(function(a) { return a.count; }) //[28,48,40,19,96,27,100]
-	        }
-	    ]
-        };
+        //return {
+	//    labels : usersList.map(function(a) { return a.name; }), //["January","February","March","April","May","June","July"],
+	//    datasets : [
+	//        {
+	//	    fillColor : "rgba(151,187,205,0.5)",
+	//	    strokeColor : "rgba(151,187,205,1)",
+	//	    data: usersList.map(function(a) { return a.count; }) //[28,48,40,19,96,27,100]
+	//        }
+	//    ]
+        //};
     }
 
     $scope.issues = List.query({id: $routeParams.listId}, function() {
@@ -184,6 +202,44 @@ function ListController($scope, $routeParams, List)
             });
         }
     });
+
+    $scope.userListClass = function(username) {
+
+        var active = false;
+        if (username == 'all' && Object.keys($scope.selectedUsers).length == 0)
+            active = true;
+        else if (username in $scope.selectedUsers) {
+            active = true;
+        }
+
+        if (active) {
+            return "active";
+        } else {
+            return null;
+        }
+    }
+
+    $scope.userClicked = function(username) {
+
+        if (username == 'all') {
+            $scope.selectedUsers = {};
+        } else {
+            $scope.selectedUsers = {};
+            $scope.selectedUsers[username] = true;
+        }
+
+        //if (username in $scope.selectedUsers) {
+        //    delete $scope.selectedUsers[username];
+        //} else {
+        //    $scope.selectedUsers[username] = true;
+        //}
+    };
+
+    $scope.issueFilter = function(issue) {
+        if (Object.keys($scope.selectedUsers).length == 0)
+            return true;
+        return (issue.fields.assignee.name in $scope.selectedUsers);
+    }
 }
 
 function BurndownController($scope)
