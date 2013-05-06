@@ -32,8 +32,8 @@ div(ng-controller='ListController')
     tbody     
       tr(ng-repeat='issue in issues | filter:issueFilter')
         td 
-          a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}: 
-          {{issue.fields.summary}}
+          a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
+          | : {{issue.fields.summary}}
         td 
            img(src='{{issue.fields.priority.iconUrl}}')
         td {{issue.fields.updated | ago}} 
