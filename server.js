@@ -12,6 +12,7 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.bodyParser());
+  app.use(express.cookieParser());
   app.use(express.methodOverride());
   app.use(express.static(__dirname + '/public'));
   app.use(app.router);
@@ -28,6 +29,9 @@ app.configure('production', function(){
 // Routes for HTML pages
 app.get('/', routes.index);
 app.get('/partials/:name', routes.partials);
+
+// Magic URL for initial setup
+app.get('/setup/:clientConfig', routes.setup);
 
 // Before doing any API calls, do some basic checks
 app.get('/api/*', api.check)

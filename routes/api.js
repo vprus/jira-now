@@ -189,7 +189,12 @@ exports.status = function(req, res) {
 }
 
 exports.clientConfig = function(req, res) {
-    res.json(config.clientConfig);
+    console.log("clientConfig, cookie is ", req.cookies['clientConfig']);
+    var clientConfig = req.cookies['clientConfig'];
+    if (!clientConfig || !(clientConfig in config.clientConfigs)) {
+        clientConfig = "default";
+    }
+    res.json(config.clientConfigs[clientConfig]);
 }
 
 function processChanges(changes, since, users)
