@@ -199,6 +199,7 @@ function ListController($scope, $routeParams, List)
             $scope.updatingList = 1;
             $scope.issues = List.query({id: $routeParams.listId}, function() {
                 $scope.updatingList = 0;
+                $scope.counts = $scope.updateCounts($scope.issues);
             });
         }
     });

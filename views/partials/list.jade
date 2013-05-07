@@ -16,7 +16,7 @@ div(ng-controller='ListController')
       strong {{11}}
       p critical
 
-  div.list-users
+  div.list-users(ng-class='{disabled: updating == 1 || updatingList == 1}')
     div(class="left")  
       a(ng-click="userClicked('all')", ng-class="userListClass('all')")
         span.badge.badge-success all {{issues.length}}
