@@ -132,13 +132,33 @@ body {
     pointer-events: none;
 }
 
-.list-users > a {
-    margin: 5px;
+.list-users a {
+    margin: 0px 6px;
     padding-bottom: 3px;
+    display: inline-block;
+    vertical-align: top;
+    height: 18px;
 }
 
-.list-users > a.active {
+.list-users .badge {
+    vertical-align: top;
+}
+
+
+.list-users a.active {
     border-bottom: solid;
     border-bottom-color: #0088cc;
     border-bottom-width: 3px;
+}
+
+.list-users > .left {
+    float: left;
+    position: relative;
+    margin-right: 10px;
+}
+
+.list-users > .right {
+    position: static;
+    overflow: hidden;
+    line-height: 27px;
 }
