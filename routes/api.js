@@ -303,7 +303,6 @@ exports.list = function(req, res) {
         } else {
 
             // FIXME: apparently, document can be null now. Act property.
-            document.issues.sort(function(a, b) { return a.fields.priority.id - b.fields.priority.id; })
             res.send(document.issues);
         }
     });    
