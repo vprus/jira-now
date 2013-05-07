@@ -153,12 +153,10 @@ body {
 
 .list-users > .left {
     float: left;
-    position: relative;
     margin-right: 10px;
 }
 
 .list-users > .right {
-    position: static;
     overflow: hidden;
     line-height: 27px;
 }
