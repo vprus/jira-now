@@ -160,3 +160,7 @@ body {
     overflow: hidden;
     line-height: 27px;
 }
+
+.issue-list h1 a:hover {
+    text-decoration: none;
+}
