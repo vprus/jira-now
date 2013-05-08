@@ -133,7 +133,7 @@ function ListController($scope, $routeParams, List)
     for (var i = 0; i < $scope.clientConfig.lists.length; ++i) {
         var list = $scope.clientConfig.lists[i];
         if (list.id == $routeParams.listId) {
-            $scope.name = list.name;
+            $scope.list = list;
             break;
         }
     }

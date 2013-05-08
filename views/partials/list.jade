@@ -1,20 +1,9 @@
 div(ng-controller='ListController')
 
-  h1 {{name}}
-  //canvas(style='float: right', id='workload', width='800', height='300', data-bar-chart="counts")
-
-  //div.span12      
-
-   div.person
-      p {{name}}
-
-   div.counter
-      strong {{10}}
-      p blockers
-
-   div.counter
-      strong {{11}}
-      p critical
+  h1 {{list.name}} 
+    small(ng-cloak, ng-show='list.url')
+      a(href='{{list.url}}')
+        i(class='icon-external-link')
 
   div.list-users(ng-class='{disabled: updating == 1 || updatingList == 1}')
     div(class="left")  
@@ -30,7 +19,6 @@ div(ng-controller='ListController')
         th Issue
         th Priority
         th Updated
-        //th Assignee
     tbody     
       tr(ng-repeat='issue in issues | filter:issueFilter')
         td 
@@ -39,7 +27,6 @@ div(ng-controller='ListController')
         td 
            img(src='{{issue.fields.priority.iconUrl}}')
         td {{issue.fields.updated | ago}} 
-        //td {{issue.fields.assignee.name}}
 
 
   
