@@ -14,7 +14,7 @@ block content
              ul.dropdown-menu             
                li(ng-repeat='list in clientConfig.lists')
                  a(href='#/list/{{list.id}}') {{list.name}}
-           li.dropdown(data-match-route='/week/.*')
+           li.dropdown.ng-cloak(ng-show='clientConfig.users', data-match-route='/week/.*')
              a(href='#', data-toggle='dropdown').dropdown-toggle Week 
                b.caret
              ul.dropdown-menu               
