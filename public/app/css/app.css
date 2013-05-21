@@ -164,3 +164,12 @@ body {
 .issue-list h1 a:hover {
     text-decoration: none;
 }
+
+.muted-hover {
+    display: none;
+    color: #999999;
+}
+
+tr:hover .muted-hover {
+    display: inline;
+}

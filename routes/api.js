@@ -88,7 +88,7 @@ function queryAndSaveIssues(query, callback)
     jira.searchJira(query, options, function(error, jd) {
 
         if (error) {
-            console.log("Jira error " + error + j);
+            console.log("Jira error " + error + jd);
             callback(error, null);
         } else {
 
@@ -114,7 +114,7 @@ function queryAndSaveList(listId, query, callback)
     maxResults = 500;
     var options = {
         maxResults: 500, 
-        fields: ["id", "key", "updated", "summary", "priority", "assignee"],
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "customfield_11741"],
     }
     console.log("List query " + query);
     jira.searchJira(query, options, function(error, jd) {
