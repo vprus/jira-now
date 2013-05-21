@@ -302,8 +302,11 @@ exports.list = function(req, res) {
             res.send(500, error);
         } else {
 
-            // FIXME: apparently, document can be null now. Act property.
-            res.send(document.issues);
+            if (document == null) {
+                res.send(500, "The list does not exist");
+            } else {
+                res.send(document.issues);
+            }
         }
     });    
 }
