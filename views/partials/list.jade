@@ -13,19 +13,30 @@ div(ng-controller='ListController').issue-list
       a(ng-repeat="entry in counts", ng-click="userClicked(entry.name)", ng-class="userListClass(entry.name)")
         span.badge.badge-success {{entry.name}} {{entry.count}}
      
-  table.table(ng-class='{disabled: updating == 1 || updatingList == 1}')
-    thead   
+
+  //- We need to display the 'priority' column conditionally. It cannot use
+      ng-switch inside 'tr', see https://groups.google.com/forum/#!msg/angular/YEx0kUtZPhM/DTyajiEI2GwJ
+      One option is to use ng-switch on the top-level, which is code duplication,
+      Another option is ng-show on th/td elements.
+      Finally, what should be more efficient is special class on the table if
+      we want to hide priority, together with CSS to set display: none on cells.  
+      
+      Also note quoted 'hide-priority' - otherwise it's not valid JS and
+      silently does not work.
+
+  table.table(ng-class="{disabled: updating == 1 || updatingList == 1, 'hide-priority': !list.priority}")
+    thead
       tr
         th Issue
-        th Priority
+        th.priority Priority
         th Updated
     tbody     
-      tr(ng-repeat='issue in issues | filter:issueFilter')
+      tr(ng-repeat='issue in issues | filter:issueFilter', ng-switch="1")
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.fields.summary}} 
           span(class='muted') {{issue.fields.customfield_11741}}
-        td 
+        td.priority
            img(src='{{issue.fields.priority.iconUrl}}')
         td {{issue.fields.updated | ago}} 
 

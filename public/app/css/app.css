@@ -173,3 +173,11 @@ body {
 tr:hover .muted-hover {
     display: inline;
 }
+
+table.hide-priority th.priority {
+    display: none;
+}
+
+table.hide-priority td.priority {
+    display: none;
+}
