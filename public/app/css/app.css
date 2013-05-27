@@ -181,3 +181,18 @@ table.hide-priority th.priority {
 table.hide-priority td.priority {
     display: none;
 }
+
+table thead {
+    display: none;
+}
+
+.table th {
+    border: 0;
+    border-top: 0;
+    padding: 20px 8px 8px 8px;
+}
+
+.table tbody + tbody {
+    border-top: 0;
+}
+

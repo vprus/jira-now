@@ -114,7 +114,7 @@ function queryAndSaveList(listId, query, callback)
     maxResults = 500;
     var options = {
         maxResults: 500, 
-        fields: ["id", "key", "updated", "summary", "priority", "assignee", "customfield_11741"],
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", "customfield_11741"],
     }
     console.log("List query " + query);
     jira.searchJira(query, options, function(error, jd) {

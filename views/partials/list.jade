@@ -30,8 +30,10 @@ div(ng-controller='ListController').issue-list
         th Issue
         th.priority Priority
         th Updated
-    tbody     
-      tr(ng-repeat='issue in issues | filter:issueFilter', ng-switch="1")
+    tbody(ng-repeat='group in groups')
+      tr 
+        th {{group.name}}     
+      tr(ng-repeat='issue in group.issues | filter:issueFilter', ng-switch="1")
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.fields.summary}} 
