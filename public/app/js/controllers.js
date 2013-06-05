@@ -108,6 +108,13 @@ function WeekController($scope, $routeParams, Week) {
         return false;
     }
 
+    $scope.issueTotalHours = function(issue) {
+        var result = 0;
+        for (var user in $scope.selectedUsers)
+            result += issue.totals[user];
+        return result;
+    }
+
     $scope.logFilter = function(item) { 
         return scope.selectedUsers[item.author] == true;
     };     

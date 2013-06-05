@@ -37,9 +37,9 @@ div(ng-controller='WeekController')
       strong {{workedIssues}}
       p issues
 
-  div(ng-repeat="issue in issues | filter:issueFilter").span12
+  div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true").span12
 
-    b {{issue.key}}: {{issue.summary}}
+    b {{issue.key}}: {{issue.summary}} - {{issueTotalHours(issue)|formatDuration}}
 
     ul
       li(ng-repeat="log in issue.log | filter:logFilter") 

@@ -289,8 +289,17 @@ exports.changes = function(req, res) {
                 log = log.concat(processChanges(issue.fields.worklog.worklogs, since, users));
             }
             log.sort(function(a, b) { return a.date.getTime() - b.date.getTime(); });
+
+            // Total seconds by each user
+            var totals = {}
+            log.forEach(function(entry) {
+                if (!(entry.author in totals)) totals[entry.author] = 0;
+                totals[entry.author] += (entry.timeSpentSeconds || 0);
+            });
+
+            var total = log.reduce(function(a, b) { return a + (b.timeSpentSeconds || 0); }, 0)
                
-            result.push({key: issue.key, summary: issue.fields.summary, log: log});
+            result.push({key: issue.key, summary: issue.fields.summary, totals: totals, log: log});
         }
     });
 }
