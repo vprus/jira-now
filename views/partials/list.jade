@@ -37,7 +37,7 @@ div(ng-controller='ListController').issue-list
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.fields.summary}} 
-          span(class='muted') {{issue.fields.customfield_11741}}
+          span(class='muted') {{issue.fields._whiteboard}}
         td.priority
            img(src='{{issue.fields.priority.iconUrl}}')
         td {{issue.fields.updated | ago}} 

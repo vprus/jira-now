@@ -114,7 +114,7 @@ function queryAndSaveList(listId, query, callback)
     maxResults = 500;
     var options = {
         maxResults: 500, 
-        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", "customfield_11741"],
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", config.jira.whiteboardFieldId],
     }
     console.log("List query " + query);
     jira.searchJira(query, options, function(error, jd) {
@@ -128,6 +128,12 @@ function queryAndSaveList(listId, query, callback)
                 callback("Too many changed issues", null);
                 return;
             }
+
+            // Add artificial field _whiteboard to isolate client side
+            // code from actual id of whiteboard field.
+            jd.issues.forEach(function (issue) {
+                issue.fields._whiteboard = issue.fields[config.jira.whiteboardFieldId];
+            });
 
             jd._id = listId;
             lists.update({_id: listId}, jd, {safe: true, upsert: true}, callback);
