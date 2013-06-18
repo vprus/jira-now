@@ -39,7 +39,11 @@ div(ng-controller='WeekController')
 
   div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true").span12
 
-    b {{issue.key}}: {{issue.summary}} - {{issueTotalHours(issue)|formatDuration}}
+    b
+      a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
+      | : {{issue.summary}} 
+      span(ng-show="issueTotalHours(issue)") - {{issueTotalHours(issue)|formatDuration}}
+
 
     ul
       li(ng-repeat="log in issue.log | filter:logFilter") 
