@@ -5,6 +5,7 @@ var config = require('../config')
 var request = require('request');
 var async = require('async');
 var moment = require('moment');
+var url = require('url');
 
 var JiraApi = require('jira').JiraApi;
 var MongoClient = require('mongodb').MongoClient;
@@ -12,6 +13,7 @@ var MongoClient = require('mongodb').MongoClient;
 var db;
 var issues;
 var lists;
+var structures;
 var metaCollection;
 var meta;
 
@@ -30,6 +32,14 @@ MongoClient.connect(config.mongo.url, function(err, d) {
                 return;
             }
             issues = _issues;
+        });
+
+        db.collection('structures', function(err, _structures) {
+            if (err) {
+                console.log("Could not open structures collection: " + err);
+                return;
+            }
+            structures = _structures;
         });
 
         db.collection('lists', function(err, _lists) {
@@ -107,16 +117,17 @@ function queryAndSaveIssues(query, callback)
     });
 }
 
-function queryAndSaveList(listId, query, callback)
+// Query Jira, obtaining minimal set of fields. Presently, this is used to
+// display issue list with limited details. In future, we might want to just
+// obtain ids, move the whiteboard fixup code into above queryAndSaveIssue,
+// and then join issue id lists with actual data when necessary.
+function queryMinimal(query, callback)
 {
-    console.log("queryAndSaveUpdated");
-
     maxResults = 500;
     var options = {
         maxResults: 500, 
         fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", config.jira.whiteboardFieldId],
     }
-    console.log("List query " + query);
     jira.searchJira(query, options, function(error, jd) {
 
         if (error) {
@@ -135,11 +146,243 @@ function queryAndSaveList(listId, query, callback)
                 issue.fields._whiteboard = issue.fields[config.jira.whiteboardFieldId];
             });
 
-            jd._id = listId;
-            lists.update({_id: listId}, jd, {safe: true, upsert: true}, callback);
+            callback(null, jd);
         }
     });
 }
+
+function updateList(list, callback)
+{
+    if (list.explicitGrouping) {
+
+        console.log("Updating explicit list");
+
+        var tasks = list.groups.map(function(g) {
+            return function(callback) {
+
+                lists.findOne({_id: g.filterId}, function(error, document) {
+                    if (error) {
+                        callback(error, null);
+                    } else {
+                        console.log("Obtained issues " + JSON.stringify(document, null, 4));
+                        callback(null, {name: g.name, issues: document.issues});
+                    }
+                });
+            }
+        });
+
+        async.series(tasks, function(error, results) {
+            if (error) {
+                callback(error, null);
+            } else {
+
+                console.log("Saved list");
+                result = {_id: list.id, issues: [], groups: results};
+                console.log("Groups: " + JSON.stringify(results, null, 4));
+                lists.update({_id: list.id}, result, {safe: true, upsert: true}, callback);
+                return;
+            }
+        });
+        return;
+    }
+
+    queryMinimal(list.query, function (error, jd) {
+
+        if (list.groups) {
+            var groupMap = {}
+            list.groups.forEach(function(x) { groupMap[x] = []; });
+            jd.issues.forEach(function(issue) {
+                var group;
+                for (var i = 0; i < issue.fields.fixVersions.length; ++i) {
+                    var v = issue.fields.fixVersions[i].name;
+                    if (v in list.groupByVersion) {
+                        group = list.groupByVersion[v];
+                        break;
+                    }
+                }
+                if (!group) { group = list.defaultGroup; }
+                groupMap[group].push(issue);
+            });
+            jd.groups = list.groups.map(function(x) { 
+                return {name: x, issues: groupMap[x]};
+            });
+        } else {
+            jd.groups = [{name: "", issues: $scope.issues}];
+        }
+        
+        jd._id = list.id
+        lists.update({_id: list.id}, jd, {safe: true, upsert: true}, callback);        
+    });
+}
+
+function updateFilter(filter, callback)
+{
+    console.log("updateFilter: " + filter.type);
+
+    if (filter.type == "structure-children") {
+
+        console.log("updateFilter: doing query");
+
+        queryMinimal(filter.query, function(error, data) {
+            if (error) {
+                console.log("Query error: " + JSON.stringify(error, null, 4));
+                callback(error, null);
+                return;
+            }
+
+            console.log("structure-children-initial: " + JSON.stringify(data, null, 4));
+            
+            structures.findOne({_id: filter.structure}, function(error, s) {
+                if (error) {
+                    callback(error, null);
+                    return;
+                }
+
+                console.log("Obtained structure " + JSON.stringify(s, null, 4));
+
+                var result = [];
+
+                data.issues.forEach(function (issue) {                    
+
+                    console.log("Issue " + issue.key + "/" + issue.id + " has these children: " + s._tree[issue.id]);
+
+                    s._tree[issue.id].forEach(function(x) { result.push(x); });
+                });
+
+                var query = "id in (" + result.join(",") + ")";
+                if (filter.subquery) {
+                    query = query + " and " + filter.subquery;
+                }
+
+                queryMinimal(query, function(error, data) {
+
+                    if (error) {
+                        console.log("Error on " + "id in (" + result.join(",") + ")");
+                        console.log(JSON.stringify(error, null, 4));
+                        return;
+                    }
+
+                    
+                    data._id = filter.id;         
+                    console.log("Final filter result " + JSON.stringify(data, null, 4));
+                    lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);
+                });                
+            });
+        });
+
+    } else if (filter.type == 'query') {
+
+        queryMinimal(filter.query, function(error, data) {
+
+            if (error) {
+                console.log("Query error: " + JSON.stringify(error, null, 4));
+                return;
+            }
+
+            data._id = filter.id;         
+            lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);
+            callback(null, data);            
+        });
+        
+    } else {
+        callback("Invalid filter type", null);
+    }
+}
+
+function updateStructure(id, callback)
+{
+    console.log("Updating structure " + id);
+
+    maxResults = 500;
+    var options = {
+        maxResults: 500, 
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", config.jira.whiteboardFieldId],
+    }
+
+    function makeStructureUri(pathname) {
+
+        var uri = url.format({
+            protocol: jira.protocol,
+            hostname: jira.host,
+            auth: jira.username + ':' + jira.password,
+            port: jira.port,
+            pathname: 'rest/structure/1.0/' + pathname
+        });
+        return uri;
+    };
+
+    function getStructure(id, callback) {
+
+        var options = {
+            uri: makeStructureUri('structure/' + id + '/forest'),
+            method: 'GET',
+            json: true
+        };
+
+        // Uhm, Jira library should provide a way to request random URL.
+        jira.request(options, function(error, response, body) {
+
+            if (error) {
+                callback(error, null);
+                return;
+            }
+
+            if (response.statusCode === 200) {           
+                callback(null, body);
+                return;
+            }
+            if (response.statusCode === 500) {
+                callback(response.statusCode + ': Error while retrieving structure ' + id + '.');
+                return;
+            }
+
+            callback(response.statusCode + ': Error while updating');
+        });
+    }
+
+    // Take Structure's 'formula', which is a list of 'id:depth' pairs and create a tree we can use, mapping
+    // from issue id to all children.
+    function makeTree(formula) {
+
+        formula = formula.split(',').map(function(f) { var s = f.split(':'); return [parseInt(s[0]), parseInt(s[1])]; });
+        console.log("Formula = " + formula);
+
+        var tree = {};
+        var levels = [];
+
+        formula.forEach(function(f) {
+            
+            var id = f[0];
+            var level = f[1];
+
+            tree[id] = [];
+
+            if (level > 0) {
+                var parent = levels[level-1];
+                
+                tree[parent].push(id);
+            }
+            levels[level] = id;
+        });
+
+        return tree;
+    }
+
+    getStructure(id, function(error, jd) {
+
+        if (error) {
+            console.log("Ick " + error);
+            callback(error, null);
+        } else {
+
+            jd._id = jd.structure;
+            jd._tree = makeTree(jd.formula);
+            console.log("Got structure: " + JSON.stringify(jd, null, 4));
+            structures.update({_id: jd.structure}, jd, {safe: true, upsert: true}, callback);
+        }
+    });
+}
+
 
 exports.check = function(req, res, next) {
     if (!jira || !db || !issues) {
@@ -167,13 +410,28 @@ exports.update = function(req, res) {
         queryAndSaveIssues(query, callback);
     }
 
-    function updateListFactory(list) {
+    function updateStructureFactory(structure_id) {
         return function(callback) {
-            queryAndSaveList(list.id, list.query, callback);            
+            updateStructure(structure_id, callback);
         }
     }
 
-    var tasks = [updateAllChanged].concat(config.lists.map(updateListFactory))
+    function updateFilterFactory(filter) {
+        return function(callback) {
+            updateFilter(filter, callback);
+        }
+    }
+
+    function updateListFactory(list) {
+        return function(callback) {
+            updateList(list, callback);            
+        }
+    }
+
+    var tasks = [updateAllChanged]
+        .concat(config.jira.structures.map(updateStructureFactory))
+        .concat(config.filters.map(updateFilterFactory))
+        .concat(config.lists.map(updateListFactory));
 
     async.series(
         tasks,
@@ -320,7 +578,7 @@ exports.list = function(req, res) {
             if (document == null) {
                 res.send(500, "The list does not exist");
             } else {
-                res.send(document.issues);
+                res.send(document);
             }
         }
     });    

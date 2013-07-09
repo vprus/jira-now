@@ -199,28 +199,15 @@ function ListController($scope, $routeParams, List)
     function updateIssues()
     {
         $scope.updatingList = 1;
-        $scope.issues = List.query({id: $routeParams.listId}, function() {
+        var list = List.get({id: $routeParams.listId}, function() {
             $scope.updatingList = 0;
-            if (list.groups) {
-                var groupMap = {}
-                list.groups.forEach(function(x) { groupMap[x] = []; });
-                $scope.issues.forEach(function(issue) {
-                    var group;
-                    for (var i = 0; i < issue.fields.fixVersions.length; ++i) {
-                        var v = issue.fields.fixVersions[i].name;
-                        if (v in list.groupByVersion) {
-                            group = list.groupByVersion[v];
-                            break;
-                        }
-                    }
-                    if (!group) { group = list.defaultGroup; }
-                    groupMap[group].push(issue);
+            $scope.issues = list.issues;
+            $scope.groups = list.groups;
+            if (!list.issues || list.issues.length == 0) {
+                $scope.issues = [];
+                list.groups.forEach(function(g) {
+                    $scope.issues = $scope.issues.concat(g.issues);
                 });
-                $scope.groups = list.groups.map(function(x) { 
-                    return {name: x, issues: groupMap[x]};
-                });
-            } else {
-                $scope.groups = [{name: "", issues: $scope.issues}];
             }
 
             $scope.counts = $scope.updateCounts($scope.issues);
