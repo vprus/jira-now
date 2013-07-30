@@ -241,23 +241,32 @@ function updateFilter(filter, callback)
                 console.log("Obtained structure " + JSON.stringify(s, null, 4));
 
                 var result = [];
-
+                var childless = [];
                 data.issues.forEach(function (issue) {                    
 
                     console.log("Issue " + issue.key + "/" + issue.id + " has these children: " + s._tree[issue.id]);
 
-                    s._tree[issue.id].forEach(function(x) { result.push(x); });
+                    if (s._tree[issue.id].length) {
+                        s._tree[issue.id].forEach(function(x) { result.push(x); });
+                    } else {
+                        // For now, put issue without children in result as well.
+                        childless.push(issue.id);
+                    }
                 });
 
                 var query = "id in (" + result.join(",") + ")";
                 if (filter.subquery) {
                     query = query + " and " + filter.subquery;
                 }
+                if (childless.length) {
+                    query = "(" + query + ") or (id in (" + childless.join(",") + "))";
+                    console.log("Childless structure issues found, final query: " + query);
+                }
 
                 queryMinimal(query, function(error, data) {
 
                     if (error) {
-                        console.log("Error on " + "id in (" + result.join(",") + ")");
+                        console.log("Query: " + query);
                         console.log(JSON.stringify(error, null, 4));
                         return;
                     }

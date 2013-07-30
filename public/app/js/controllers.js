@@ -152,6 +152,9 @@ function ListController($scope, $routeParams, List)
         var users = {}
         issues.forEach(function(issue) {
             var name = issue.fields.assignee.name;
+            if (!name) {
+                name = "none";
+            }
             if (users[name] == undefined)
                 users[name] = 1;
             else
