@@ -213,7 +213,9 @@ function ListController($scope, $routeParams, List)
                 });
             }
 
-            $scope.counts = $scope.updateCounts($scope.issues);
+            if (list.users != false) {
+                $scope.counts = $scope.updateCounts($scope.issues);
+            }
         });
     }
     updateIssues();

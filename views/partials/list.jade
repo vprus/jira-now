@@ -1,11 +1,13 @@
 div(ng-controller='ListController').issue-list
 
-  h1 {{list.name}} 
-    small(ng-cloak, ng-show='list.url')
-      a(href='{{list.url}}')
-        i(class='icon-external-link')
+  span(class='list-header')
+    h1 {{list.name}}
+      span(ng-cloak, ng-show='list.description', class='description')  {{list.description}}
+      span(style='float: right') 
+        a(toggle='showHelp', class='icon-question-sign', href='#')
+    span(ng-cloak, ng-show='list.help && showHelp', class='help') {{list.help}}
 
-  div.list-users(ng-class='{disabled: updating == 1 || updatingList == 1}')
+  div.list-users(ng-show='list.users', ng-class='{disabled: updating == 1 || updatingList == 1}')
     div(class="left")  
       a(ng-click="userClicked('all')", ng-class="userListClass('all')")
         span.badge.badge-success all {{issues.length}}
@@ -32,7 +34,9 @@ div(ng-controller='ListController').issue-list
         th Updated
     tbody(ng-repeat='group in groups')
       tr 
-        th {{group.name}}     
+        th {{group.name}} 
+          span(ng-cloak, class='description') {{group.description}}
+          span(ng-cloak, ng-show='group.help && showHelp', class='help') {{group.help}}
       tr(ng-repeat='issue in group.issues | filter:issueFilter', ng-switch="1")
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}

@@ -189,10 +189,63 @@ table thead {
 .table th {
     border: 0;
     border-top: 0;
-    padding: 20px 8px 8px 8px;
+    padding: 20px 0px 12px 0px;
+}
+
+.table td {
+    padding: 8px 0px 8px 0px;
 }
 
 .table tbody + tbody {
     border-top: 0;
 }
 
+th a.icon-question-sign {
+    display: none;
+    color: #999999;    
+    padding-left: 6px;
+}
+
+th:hover a.icon-question-sign {
+    display: inline;
+}
+
+.description {
+    color: #999999;
+    font-size: 14px;
+    //line-height: 14px;
+    font-weight: normal;
+}
+
+.help {
+    display: block;
+    //color: #0000;
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: normal;
+    border-left: 5px solid;
+    padding-left: 5px;
+    border-color: #0088cc;
+}
+
+
+.list-header h1 {
+    margin-bottom: 0px;
+}
+
+.list-header {
+    display: block;
+    margin-bottom: 30px;
+}
+
+th .help {
+    margin-top: 10px;
+}
+
+.pressed {
+    color: #000000;
+}
+
+.pressed:hover {
+    color: #000000;
+}

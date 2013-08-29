@@ -164,8 +164,8 @@ function updateList(list, callback)
                     if (error) {
                         callback(error, null);
                     } else {
-                        console.log("Obtained issues " + JSON.stringify(document, null, 4));
-                        callback(null, {name: g.name, issues: document.issues});
+                        //console.log("Obtained issues " + JSON.stringify(document, null, 4));
+                        callback(null, {name: g.name, description: g.description, help: g.help, issues: document.issues});
                     }
                 });
             }
@@ -177,8 +177,23 @@ function updateList(list, callback)
             } else {
 
                 console.log("Saved list");
+                var seen = {};
+    
+                results = results.map(function(group) {
+                    var r = [];
+                    group.issues.forEach(function(issue) {
+                        if (!(issue.key in seen)) {
+                            r.push(issue);
+                        }
+                        seen[issue.key] = 1;
+                    });
+                    group.issues = r;
+                    return group;
+                });
+
                 result = {_id: list.id, issues: [], groups: results};
-                console.log("Groups: " + JSON.stringify(results, null, 4));
+
+                //console.log("Groups: " + JSON.stringify(results, null, 4));
                 lists.update({_id: list.id}, result, {safe: true, upsert: true}, callback);
                 return;
             }
@@ -238,7 +253,7 @@ function updateFilter(filter, callback)
                     return;
                 }
 
-                console.log("Obtained structure " + JSON.stringify(s, null, 4));
+                //console.log("Obtained structure " + JSON.stringify(s, null, 4));
 
                 var result = [];
                 var childless = [];
@@ -273,7 +288,7 @@ function updateFilter(filter, callback)
 
                     
                     data._id = filter.id;         
-                    console.log("Final filter result " + JSON.stringify(data, null, 4));
+                    // console.log("Final filter result " + JSON.stringify(data, null, 4));
                     lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);
                 });                
             });

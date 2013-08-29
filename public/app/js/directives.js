@@ -35,6 +35,7 @@ angular.module('jiraNow.directives', [])
             restrict: 'A',
             scope: { data: '=barChart' },
             link: function(scope, element, attrs) {
+                console.log("Linking")
                 var ctx = element[0].getContext("2d");
                 var chart = new Chart(ctx);
                 scope.$watch('data', function(val, oldVal) {
@@ -45,6 +46,42 @@ angular.module('jiraNow.directives', [])
                 });
             }
         };
+    })
+    .directive('popover', function() {
+        return { 
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                attrs.$observe('dataTitle', function(value) {
+                    $(element).popover({title: value});
+                });
+            }
+        };
+    })
+    .directive('toggle', function() {
+        return {
+            restrict: 'A',
+            scope: { variable: '=toggle' },
+            link: function(scope, element, attrs) {
+                console.log("TOGGLE");
+                scope.variable = false;
+                var e = $(element);
+                e.click(function (event) {
+                    scope.$apply(function () {
+                        if (scope.variable == false) {
+                            console.log("Set to true");
+                            scope.variable = true;
+                            e.addClass("pressed");
+                        } else {
+                            scope.variable = false;
+                            e.removeClass("pressed");
+                        }
+                    });
+                    event.preventDefault();
+                });
+            }
+        }
     });
+
+
 
 
