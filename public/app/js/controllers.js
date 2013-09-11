@@ -265,6 +265,44 @@ function ListController($scope, $routeParams, List)
     }
 }
 
+function SprintController($scope, $routeParams, Sprint)
+{
+    for (var i = 0; i < $scope.clientConfig.sprints.length; ++i) {
+        var sprint = $scope.clientConfig.sprints[i];
+        if (sprint.id == $routeParams.sprint) {
+            $scope.sprint = sprint;
+            break;
+        }
+    }
+
+    function updateSprint()
+    {
+        $scope.updatingSprint = 1;
+        $scope.sprint = Sprint.get({id: $routeParams.sprintId}, function() {
+            $scope.updatingSprint = 0;
+        });
+    }
+
+    $scope.formatSprintEndStatus = function(issue)
+    {
+        if (["Resolved", "Closed", "Validated"].indexOf(issue.status) != -1) {
+            return issue.status;
+        } else if (issue.whiteboard) {
+            return issue.whiteboard;
+        } else {
+            return "Unknown";
+        }
+    }
+
+    $scope.$watch('updating', function(newVal, oldVal) {
+        if (oldVal == 1 && newVal == 0) {
+            updateSprint();
+        }
+    });
+
+    updateSprint();
+}
+
 function BurndownController($scope)
 {
     $scope.issues = {

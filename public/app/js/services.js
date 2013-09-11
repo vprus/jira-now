@@ -15,7 +15,16 @@ angular.module('jiraNow.services', ['ngResource'])
         return $resource('api/list/?id=:id', {}, {
             query: {method:'GET', params:{}, isArray:true}
         });
-    });
+    })
+    .factory('Sprint', function($resource) {
+        return $resource('api/sprint/?id=:id', {}, {
+            query: {method: 'GET', params: {}, isArray: true}
+        });
+    })
+;
+        
+
+
 
 
 angular.module('developmentProcess', []).

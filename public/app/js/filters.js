@@ -13,13 +13,13 @@ angular.module('jiraNow.filters', [])
             var weeks = days/5;
 
             if (weeks >= 1) {
-                result.push(weeks + " weeks");
+                result.push(weeks.toPrecision(2) + " weeks");
                 hours -= weeks*5*8;
                 days = hours/8;
             }
 
             if (days >= 1) {
-                result.push(days + " days");
+                result.push(days.toPrecision(2) + " days");
                 hours -= days*8;
             }
 

@@ -14,10 +14,13 @@ var db;
 var issues;
 var lists;
 var structures;
+var sprints;
+
 var metaCollection;
 var meta;
 
 var jira = new JiraApi("http", config.jira.host, config.jira.port || 80, config.jira.user, config.jira.password, 2, true);
+
 
 MongoClient.connect(config.mongo.url, function(err, d) {
     if(err) {
@@ -34,6 +37,10 @@ MongoClient.connect(config.mongo.url, function(err, d) {
             issues = _issues;
         });
 
+        db.ensureIndex('issues', 'fields.worklog.worklogs.created', function(err, indexName) {
+            console.log("Index creation" + err + ": " + indexName);
+        });
+
         db.collection('structures', function(err, _structures) {
             if (err) {
                 console.log("Could not open structures collection: " + err);
@@ -48,6 +55,14 @@ MongoClient.connect(config.mongo.url, function(err, d) {
                 return;
             }
             lists = _lists;
+        });
+
+        db.collection('sprints', function(err, _sprints) {
+            if (err) {
+                console.log("Could not open sprints collection: " + err);
+                return;
+            }
+            sprints = _sprints;
         });
 
         db.collection('meta', function(err, _meta) {
@@ -78,7 +93,8 @@ MongoClient.connect(config.mongo.url, function(err, d) {
 function fixDates(item)
 {
     item.created = new Date(item.created);
-    item.updated = new Date(item.updated);
+    if (item.updated)
+        item.updated = new Date(item.updated);
     if (item.started)
         item.started = new Date(item.started);
 }
@@ -92,8 +108,9 @@ function fixDates(item)
 function queryAndSaveIssues(query, callback) 
 {
     var options = {
-        maxResults: 500, 
-        fields: ["*all"]            
+        // FIXME: should use chunking to fetch all issues.
+        maxResults: 1500, 
+        fields: ["id, key"]            
     }
     jira.searchJira(query, options, function(error, jd) {
 
@@ -101,18 +118,43 @@ function queryAndSaveIssues(query, callback)
             console.log("Jira error " + error + jd);
             callback(error, null);
         } else {
-
-            var saveTasks = jd.issues.map(function(issue) {
+            
+            var queryTasks = jd.issues.map(function(minIssue) {
+                
                 return function(callback) {
-                    issue._id = issue.id;
-                    fixDates(issue.fields);
-                    issue.fields.comment.comments.forEach(fixDates);
-                    issue.fields.worklog.worklogs.forEach(fixDates);
-                    issues.update({_id: issue.id}, issue, {safe: true, upsert: true}, callback);
-                    console.log("Updated " + issue.key);
+                    jira.findIssue(minIssue.id + "?expand=changelog", function(error, issue) {
+                        if (error) {
+                            console.log("Error getting details on " + minIssue.key);
+                            callback(error, null);
+                        } else {
+                            if (issue.key == "CB-2404") {
+                                console.log("!!!!! " + JSON.stringify(issue, null, 4));
+                            }
+                            issue._id = issue.id;
+                            fixDates(issue.fields);
+                            issue.fields.comment.comments.forEach(fixDates);
+                            issue.fields.worklog.worklogs.forEach(fixDates);
+                            issue.changelog.histories.forEach(fixDates);
+                            issues.update({_id: issue.id}, issue, {safe: true, upsert: true}, callback);
+                            console.log("Updated " + issue.key);
+                        }
+                    });
+                }
+            });
+            async.parallelLimit(queryTasks, 20, callback);
+
+/*
+            var saveTasks = jd.issues.map(function(issue) {
+
+
+
+
+                return function(callback) {
+                    
                 }
             });
             async.series(saveTasks, callback);
+*/
         }
     });
 }
@@ -232,11 +274,7 @@ function updateList(list, callback)
 
 function updateFilter(filter, callback)
 {
-    console.log("updateFilter: " + filter.type);
-
     if (filter.type == "structure-children") {
-
-        console.log("updateFilter: doing query");
 
         queryMinimal(filter.query, function(error, data) {
             if (error) {
@@ -244,16 +282,12 @@ function updateFilter(filter, callback)
                 callback(error, null);
                 return;
             }
-
-            console.log("structure-children-initial: " + JSON.stringify(data, null, 4));
-            
+           
             structures.findOne({_id: filter.structure}, function(error, s) {
                 if (error) {
                     callback(error, null);
                     return;
                 }
-
-                //console.log("Obtained structure " + JSON.stringify(s, null, 4));
 
                 var result = [];
                 var childless = [];
@@ -275,7 +309,6 @@ function updateFilter(filter, callback)
                 }
                 if (childless.length) {
                     query = "(" + query + ") or (id in (" + childless.join(",") + "))";
-                    console.log("Childless structure issues found, final query: " + query);
                 }
 
                 queryMinimal(query, function(error, data) {
@@ -401,9 +434,59 @@ function updateStructure(id, callback)
 
             jd._id = jd.structure;
             jd._tree = makeTree(jd.formula);
-            console.log("Got structure: " + JSON.stringify(jd, null, 4));
             structures.update({_id: jd.structure}, jd, {safe: true, upsert: true}, callback);
         }
+    });
+}
+
+
+function updateSprint(sprint, callback)
+{
+    console.log("Updating sprint " + sprint.id);
+
+    var dateMatch = {$gt: sprint.start, $lt: sprint.end};
+    var elemMatch = {$elemMatch: {'created': dateMatch}};
+    var whiteboard = 'fields.' + config.jira.whiteboardFieldId;
+    var projection = {'key': 1, 'fields.summary': 1, 'fields.status': 1, 'fields.worklog': 1, 'changelog': 1};
+    projection[whiteboard] = 1;
+    var worked = issues.find({'fields.project.key': sprint.project, 'fields.worklog.worklogs': elemMatch}, projection);
+
+    worked.explain(function(err, explanation) {
+        console.log(JSON.stringify(explanation));
+    });
+
+    // FIXME: This might be better expressed via async.
+    worked.toArray(function(err, array) {
+
+        if (err) {
+            console.log("error " + err);
+            res.send(err);
+        }
+        else {
+
+            var workedIssues = [];
+
+            console.log("Got issues " + JSON.stringify(array, null, 4));
+
+            array.forEach(function(issue) {
+                var back = walkBack(issue, sprint.end);
+
+                console.log(issue.key + " (" + issue.fields.summary + ") :");
+                console.log("   "  + back.status + " // " + back.whiteboard);
+                workedIssues.push({
+                    key: issue.key, 
+                    summary: issue.fields.summary,
+                    status: back.status,
+                    whiteboard: back.whiteboard,
+                    timeSpent: workLogged(issue, sprint.start, sprint.end)
+                });
+            });
+
+            workedIssues.sort(function(a, b) { return b.timeSpent - a.timeSpent; });
+
+            var result = {_id: sprint.id, id: sprint.id, name: sprint.name, start: sprint.start, end: sprint.end, workedIssues: workedIssues};
+            sprints.update({_id: sprint.id}, result, {safe: true, upsert: true}, callback);
+        }        
     });
 }
 
@@ -452,10 +535,18 @@ exports.update = function(req, res) {
         }
     }
 
+    function updateSprintFactory(sprint) {
+        return function(callback) {
+            updateSprint(sprint, callback);
+        }
+    }
+
     var tasks = [updateAllChanged]
         .concat(config.jira.structures.map(updateStructureFactory))
         .concat(config.filters.map(updateFilterFactory))
-        .concat(config.lists.map(updateListFactory));
+        .concat(config.lists.map(updateListFactory))
+        .concat(config.sprints.map(updateSprintFactory))
+    ;
 
     async.series(
         tasks,
@@ -601,6 +692,99 @@ exports.list = function(req, res) {
 
             if (document == null) {
                 res.send(500, "The list does not exist");
+            } else {
+                res.send(document);
+            }
+        }
+    });    
+}
+
+function walkBack(issue, date)
+{
+    var debug = 0;
+    if (issue.key == "CB-1995") {
+        debug = 1;
+    }
+
+    var result = {status: issue.fields.status.name, 
+                  whiteboard: issue.fields[config.jira.whiteboardFieldId]};
+
+    var wip = {};
+
+    if (issue.changelog) {
+        var i = issue.changelog.histories.length-1;
+        for(; i >= 0; --i) {
+            var h = issue.changelog.histories[i];
+            if (h.created.getTime() < date.getTime())
+                break;
+            h.items.forEach(function(item) {
+                if (issue.key == "CB-1995") {
+                    console.log("Processing history item " + JSON.stringify(item, null, 4));
+                }
+                if (item.field == "status") {
+                } else if (item.field == "Whiteboard") {
+                    // I totally hate Jira. Why is that changelog refers to a field by
+                    // human name, with no way to obtain ID in a reliable way?
+                    if (item.fromString)
+                        wip['whiteboard'] = item.fromString;
+                    else
+                        wip['whiteboard'] = "not set";
+                }
+            });
+        }
+    } else {
+        wip = {status: 'unknown', whiteboard: 'unknown'};
+    }
+
+    if (wip.status) {
+        result.status = wip.status; // + " (now " + result.status + ")";
+    }// else {
+    //    result.status = result.status + " (unchanged since)";
+    //}
+
+    if (wip.whiteboard) {
+        result.whiteboard = wip.whiteboard; /// + " (now " + result.whiteboard + ")";
+    } else {
+        //result.whiteboard = result.whiteboard + " (unchaged since)";
+    }    
+
+    return result;
+}
+
+function workLogged(issue, since, until)
+{
+    var result = 0;
+
+    var sinceT = since.getTime();
+    var untilT = until.getTime();
+
+    issue.fields.worklog.worklogs.forEach(function(w) {
+        if (sinceT < w.started.getTime() && w.started.getTime() < untilT) {
+            result += w.timeSpentSeconds;
+        }
+    });
+
+    return result;
+}
+
+// Returns all the issues that were worked on during specified
+// timeframe, including the status/whiteboard they had at the
+// end of that period.
+exports.sprint = function(req, res) {
+
+    if (!req.query.id) {
+        res.send(400, {error: "The 'id' query parameter is required"});
+        return;
+    }
+    var id = req.query.id;
+
+    sprints.findOne({_id: id}, function(error, document) {
+        if (error) {
+            res.send(500, error);
+        } else {
+
+            if (document == null) {
+                res.send(500, "The sprint does not exist");
             } else {
                 res.send(document);
             }

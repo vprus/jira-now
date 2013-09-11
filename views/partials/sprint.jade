@@ -1,0 +1,24 @@
+div(ng-controller='SprintController').issue-list
+
+  span(class='list-header')
+    h1 {{sprint.name}}
+    span(class='description') Sprint accomplishments at end, {{sprint.end | date:'MMM d H:mm'}}
+   
+
+  table.table(ng-class="{disable: updating == 1}")
+    thead
+      tr
+        th Issue
+        th Status at sprint end
+        th Effort
+
+    tbody
+      tr(ng-repeat='issue in sprint.workedIssues')
+        td 
+          a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
+          | : {{issue.summary}} 
+        td {{formatSprintEndStatus(issue)}}
+        td {{issue.timeSpent|formatDuration}}
+
+
+        

@@ -42,6 +42,7 @@ app.get('/api/status', api.status);
 app.get('/api/clientConfig', api.clientConfig);
 app.get('/api/changes', api.changes)
 app.get('/api/list', api.list)
+app.get('/api/sprint', api.sprint)
 
 app.post('/api/update', api.update)
 
