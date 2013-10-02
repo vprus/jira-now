@@ -264,7 +264,7 @@ function updateList(list, callback)
                 return {name: x, issues: groupMap[x]};
             });
         } else {
-            jd.groups = [{name: "", issues: $scope.issues}];
+            jd.groups = [{name: "", issues: jd.issues}];
         }
         
         jd._id = list.id
