@@ -63,7 +63,9 @@ angular.module('jiraNow.directives', [])
             scope: { variable: '=toggle' },
             link: function(scope, element, attrs) {
                 console.log("TOGGLE");
-                scope.variable = false;
+                if (scope.variable != true && scope.variable != false) {
+                    scope.variable = false;
+                }
                 var e = $(element);
                 e.click(function (event) {
                     scope.$apply(function () {
@@ -80,6 +82,27 @@ angular.module('jiraNow.directives', [])
                 });
             }
         }
+    })
+    .directive('sprintEndStatus', function() {
+        return {
+            restrict: 'A',
+            scope: { issue: '=se' },
+            link: function(scope, element, attrs) {
+                var issue = scope.issue;
+                var ctx = element[0];
+
+                var state;
+                if (["Resolved", "Closed", "Validated"].indexOf(issue.status) != -1) {
+                    state = issue.status;
+                } else if (issue.whiteboard) {
+                    state = issue.whiteboard;
+                } else {
+                    state = "<b>Not specified</b>";
+                }
+
+                element.html(state);
+            }
+        };
     });
 
 

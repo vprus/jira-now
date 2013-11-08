@@ -1,4 +1,4 @@
-div(ng-controller='SprintController').issue-list
+div(ng-controller='SprintController').sprint
 
   span(class='list-header')
     h1 {{sprint.name}}
@@ -17,7 +17,7 @@ div(ng-controller='SprintController').issue-list
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.summary}} 
-        td {{formatSprintEndStatus(issue)}}
+        td(sprint-end-status="issue")
         td {{issue.timeSpent|formatDuration}}
 
 

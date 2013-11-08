@@ -37,6 +37,8 @@ div(ng-controller='ListController').issue-list
         th {{group.name}} 
           span(ng-cloak, class='description') {{group.description}}
           span(ng-cloak, ng-show='group.help && showHelp', class='help') {{group.help}}
+      tr(ng-cloak, ng-show="group.issues.length == 0", colspan="3")
+        td No issues found    
       tr(ng-repeat='issue in group.issues | filter:issueFilter', ng-switch="1")
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}

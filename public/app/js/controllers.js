@@ -131,11 +131,20 @@ function WeekController($scope, $routeParams, Week) {
     });
 }
 
-function ListController($scope, $routeParams, List)
+function ListController($scope, $routeParams, List, $cookies)
 {
-    console.log("List Controller: " + $routeParams.listId)
+    var listId = $routeParams.listId;
+    var helpId = "showHelp_" + listId;
 
     $scope.selectedUsers = {};
+
+    var cookie = $cookies[helpId];
+    if (cookie == "false")
+        $scope.showHelp = false;
+    else if (cookie == "true")
+        $scope.showHelp = true;
+    else
+        $scope.showHelp = false;
 
     for (var i = 0; i < $scope.clientConfig.lists.length; ++i) {
         var list = $scope.clientConfig.lists[i];
@@ -224,6 +233,10 @@ function ListController($scope, $routeParams, List)
         if (oldVal == 1 && newVal == 0) {
             updateIssues();
         }
+    });
+
+    $scope.$watch('showHelp', function(newVal, oldVal) {
+        $cookies[helpId] = newVal.toString();
     });
 
     $scope.userListClass = function(username) {

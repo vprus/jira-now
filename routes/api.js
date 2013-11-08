@@ -205,8 +205,9 @@ function updateList(list, callback)
                 lists.findOne({_id: g.filterId}, function(error, document) {
                     if (error) {
                         callback(error, null);
+                    } else if (document == null) {
+                        callback("Could not obtain filter '" + g.filterId + "'");
                     } else {
-                        //console.log("Obtained issues " + JSON.stringify(document, null, 4));
                         callback(null, {name: g.name, description: g.description, help: g.help, issues: document.issues});
                     }
                 });
@@ -278,7 +279,7 @@ function updateFilter(filter, callback)
 
         queryMinimal(filter.query, function(error, data) {
             if (error) {
-                console.log("Query error: " + JSON.stringify(error, null, 4));
+                console.log("Query '" + filter.query + "' resulted in: " + JSON.stringify(error, null, 4));
                 callback(error, null);
                 return;
             }
@@ -295,7 +296,8 @@ function updateFilter(filter, callback)
 
                     console.log("Issue " + issue.key + "/" + issue.id + " has these children: " + s._tree[issue.id]);
 
-                    if (s._tree[issue.id].length) {
+                    var children = s._tree[issue.id];
+                    if (s._tree[issue.id] != undefined) {
                         s._tree[issue.id].forEach(function(x) { result.push(x); });
                     } else {
                         // For now, put issue without children in result as well.
@@ -303,27 +305,36 @@ function updateFilter(filter, callback)
                     }
                 });
 
-                var query = "id in (" + result.join(",") + ")";
-                if (filter.subquery) {
-                    query = query + " and " + filter.subquery;
-                }
-                if (childless.length) {
-                    query = "(" + query + ") or (id in (" + childless.join(",") + "))";
-                }
-
-                queryMinimal(query, function(error, data) {
-
-                    if (error) {
-                        console.log("Query: " + query);
-                        console.log(JSON.stringify(error, null, 4));
-                        return;
+                if (result.length)
+                {
+                    var query = "id in (" + result.join(",") + ")";
+                    if (filter.subquery) {
+                        query = query + " and " + filter.subquery;
+                    }
+                    if (childless.length) {
+                        query = "(" + query + ") or (id in (" + childless.join(",") + "))";
                     }
 
+                    queryMinimal(query, function(error, data) {
+
+                        if (error) {
+                            console.log("Query: " + query);
+                            console.log(JSON.stringify(error, null, 4));
+                            return;
+                        }
+
                     
-                    data._id = filter.id;         
-                    // console.log("Final filter result " + JSON.stringify(data, null, 4));
-                    lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);
-                });                
+                        data._id = filter.id;         
+                        // console.log("Final filter result " + JSON.stringify(data, null, 4));
+                        lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);                    
+                    });                
+                }
+                else
+                {
+                    // No matching issue
+                    data = {_id: filter.id, issues: []};
+                    lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);                    
+                }
             });
         });
 
