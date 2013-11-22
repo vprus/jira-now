@@ -6,6 +6,7 @@ var request = require('request');
 var async = require('async');
 var moment = require('moment');
 var url = require('url');
+var util = require('util');
 
 var JiraApi = require('jira').JiraApi;
 var MongoClient = require('mongodb').MongoClient;
@@ -455,19 +456,52 @@ function updateSprint(sprint, callback)
 {
     console.log("Updating sprint " + sprint.id);
 
+    var now = new Date();
+
     var dateMatch = {$gt: sprint.start, $lt: sprint.end};
-    var elemMatch = {$elemMatch: {'created': dateMatch}};
+    var elemMatch = {$elemMatch: {'started': dateMatch}};
     var whiteboard = 'fields.' + config.jira.whiteboardFieldId;
     var projection = {'key': 1, 'fields.summary': 1, 'fields.status': 1, 'fields.worklog': 1, 'changelog': 1};
     projection[whiteboard] = 1;
-    var worked = issues.find({'fields.project.key': sprint.project, 'fields.worklog.worklogs': elemMatch}, projection);
+    
+    function selectByFields(callback) {
 
-    worked.explain(function(err, explanation) {
-        console.log(JSON.stringify(explanation));
-    });
+        if (!sprint.fixVersion) {
+            callback(null, []);
+            return;
+        }
 
-    // FIXME: This might be better expressed via async.
-    worked.toArray(function(err, array) {
+        var s = dateToJira(sprint.start);
+        var e = dateToJira(sprint.end);
+        var query = util.format("project = '%s' and (fixVersion was '%s' DURING('%s', '%s') or resolution changed to fixed DURING('%s', '%s'))",
+                                sprint.project, sprint.fixVersion, s, e, s, e);
+
+        console.log("QUERY IS " + query);
+        
+        queryMinimal(query, function(error, data) {
+            if (error) {
+                callback(error, null);
+            } else {
+                var ids = data.issues.map(function(issue) { return issue.id; });
+                var selected = issues.find({'id': {'$in': ids}});
+                console.log("Got ids: " + ids);
+                selected.toArray(function(err, array) {
+                    if (err) {
+                        callback(err, null);
+                    } else {
+                        callback(null, array);
+                    }
+                });
+            }
+        });
+    }
+
+    function selectByWorklog(callback) {
+        var worked = issues.find({'fields.project.key': sprint.project, 'fields.worklog.worklogs': elemMatch}, projection);
+        worked.toArray(callback);
+    }
+
+    async.parallel([selectByFields, selectByWorklog], function(err, arrays) {
 
         if (err) {
             console.log("error " + err);
@@ -475,9 +509,23 @@ function updateSprint(sprint, callback)
         }
         else {
 
+            var array = arrays[0].concat(arrays[1]);
+            var seen = {};
+            //array.forEach(function(a) { seen[a] = 1; });
+            // Dedup. We don't care about order much. It might be
+            // more efficient to adjust mongodb query with ids from
+            // field selection, as opposed to doing dedup after we get
+            // all the data back.
+            array = array.sort().filter(function (e, i, a) {
+                var seenThis = e.id in seen;
+                seen[e.id] = 1;
+                return !seenThis;
+                //return i == 0 || a[i-1] != e;
+            });
             var workedIssues = [];
 
-            console.log("Got issues " + JSON.stringify(array, null, 4));
+            //console.log("Got issues " + JSON.stringify(array, null, 4));
+            console.log(array.length + " issues in sprint report");
 
             array.forEach(function(issue) {
                 var back = walkBack(issue, sprint.end);
@@ -510,16 +558,20 @@ exports.check = function(req, res, next) {
     }
 }
 
+function dateToJira(date) {
+    var selfToJiraMillis = (date.getTimezoneOffset() - config.jira.timezone) * 60 * 1000;
+    var jiraDate = new Date(date);
+    jiraDate.setTime(jiraDate.getTime() + selfToJiraMillis);
+    return moment(jiraDate).format("YYYY-MM-DD HH:mm");
+}
+
 exports.update = function(req, res) {
     var now = new Date();
     var since = "-10d";
     if (meta.lastIssuesSync)
     {
-        var jiraDate = new Date(meta.lastIssuesSync);
-        var selfToJiraMillis = (jiraDate.getTimezoneOffset() - config.jira.timezone) * 60 * 1000;
-        jiraDate.setTime(jiraDate.getTime() + selfToJiraMillis);
-        var jiraDateString = moment(jiraDate).format("YYYY-MM-DD HH:mm");
-        console.log("Sync of issues since " + jiraDate + " in timezone of '" + config.jira.user + "'");
+        var jiraDateString = dateToJira(meta.lastIssuesSync)
+        console.log("Sync of issues since " + jiraDateString + " in timezone of '" + config.jira.user + "'");
         since = '"' + jiraDateString + '"';
     }
     
@@ -720,6 +772,11 @@ function walkBack(issue, date)
     var result = {status: issue.fields.status.name, 
                   whiteboard: issue.fields[config.jira.whiteboardFieldId]};
 
+    if (date.getTime() > (new Date()).getTime()) {
+        // Requested date is in future - return the current state.
+        return result;
+    }
+
     var wip = {};
 
     if (issue.changelog) {
@@ -743,9 +800,9 @@ function walkBack(issue, date)
                 }
             });
         }
-    } else {
-        wip = {status: 'unknown', whiteboard: 'unknown'};
-    }
+    }// else {
+    //    wip = {status: 'unknown', whiteboard: 'unknown'};
+    //}
 
     if (wip.status) {
         result.status = wip.status; // + " (now " + result.status + ")";

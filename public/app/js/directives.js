@@ -86,14 +86,14 @@ angular.module('jiraNow.directives', [])
     .directive('sprintEndStatus', function() {
         return {
             restrict: 'A',
-            scope: { issue: '=se' },
+            scope: { issue: '=sprintEndStatus' },
             link: function(scope, element, attrs) {
                 var issue = scope.issue;
                 var ctx = element[0];
 
                 var state;
                 if (["Resolved", "Closed", "Validated"].indexOf(issue.status) != -1) {
-                    state = issue.status;
+                    state = "<div style='color: green; font-weight: bold'>" + issue.status + "</div>";
                 } else if (issue.whiteboard) {
                     state = issue.whiteboard;
                 } else {
