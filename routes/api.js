@@ -482,7 +482,7 @@ function updateSprint(sprint, callback)
                 callback(error, null);
             } else {
                 var ids = data.issues.map(function(issue) { return issue.id; });
-                var selected = issues.find({'id': {'$in': ids}});
+                var selected = issues.find({'id': {'$in': ids}}, projection);
                 console.log("Got ids: " + ids);
                 selected.toArray(function(err, array) {
                     if (err) {
@@ -516,10 +516,10 @@ function updateSprint(sprint, callback)
             // field selection, as opposed to doing dedup after we get
             // all the data back.
             array = array.sort().filter(function (e, i, a) {
-                var seenThis = e.id in seen;
-                seen[e.id] = 1;
+                var seenThis = e.key in seen;                
+                seen[e.key] = 1;
+                console.log(e.key + " - " + seenThis);
                 return !seenThis;
-                //return i == 0 || a[i-1] != e;
             });
             var workedIssues = [];
 
