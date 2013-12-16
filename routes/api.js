@@ -350,7 +350,6 @@ function updateFilter(filter, callback)
 
             data._id = filter.id;         
             lists.update({_id: filter.id}, data, {safe: true, upsert: true}, callback);
-            callback(null, data);            
         });
         
     } else {
