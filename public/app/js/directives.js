@@ -92,8 +92,17 @@ angular.module('jiraNow.directives', [])
                 var ctx = element[0];
 
                 var state;
-                if (["Resolved", "Closed", "Validated"].indexOf(issue.status) != -1) {
-                    state = "<div style='color: green; font-weight: bold'>" + issue.status + "</div>";
+                if (["Resolved"].indexOf(issue.status) != -1) {
+                    state = "<span style='color: green; font-weight: bold'>" + issue.status + "</span>";
+                    
+                    if (issue.statusNow == "Closed" || issue.statusNow == "Validated") {
+                        state = state + " &rarr; " + issue.statusNow;
+                    } else if (issue.assigneeNow == "mmurtaza") {
+                        state = state + " &rarr; In QA";
+                    }
+                    
+                } else if (["Closed", "Validated"].indexOf(issue.status) != -1) {
+                    state = "<span style='color: green; font-weight: bold'>" + issue.status + "</span>";
                 } else if (issue.whiteboard) {
                     state = issue.whiteboard;
                 } else {

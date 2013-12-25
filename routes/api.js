@@ -460,7 +460,12 @@ function updateSprint(sprint, callback)
     var dateMatch = {$gt: sprint.start, $lt: sprint.end};
     var elemMatch = {$elemMatch: {'started': dateMatch}};
     var whiteboard = 'fields.' + config.jira.whiteboardFieldId;
-    var projection = {'key': 1, 'fields.summary': 1, 'fields.status': 1, 'fields.worklog': 1, 'changelog': 1};
+    var projection = {'key': 1, 
+                      'fields.summary': 1, 
+                      'fields.status': 1, 
+                      'fields.assignee': 1, 
+                      'fields.worklog': 1, 
+                      'changelog': 1};
     projection[whiteboard] = 1;
     
     function selectByFields(callback) {
@@ -531,13 +536,18 @@ function updateSprint(sprint, callback)
 
                 console.log(issue.key + " (" + issue.fields.summary + ") :");
                 console.log("   "  + back.status + " // " + back.whiteboard);
-                workedIssues.push({
+                var workedIssue = {
                     key: issue.key, 
                     summary: issue.fields.summary,
                     status: back.status,
                     whiteboard: back.whiteboard,
+                    statusNow: issue.fields.status.name,
                     timeSpent: workLogged(issue, sprint.start, sprint.end)
-                });
+                };
+                if (issue.fields.assignee) {
+                    workedIssue.assigneeNow = issue.fields.assignee.name;
+                }
+                workedIssues.push(workedIssue);
             });
 
             workedIssues.sort(function(a, b) { return b.timeSpent - a.timeSpent; });
@@ -789,6 +799,7 @@ function walkBack(issue, date)
                     console.log("Processing history item " + JSON.stringify(item, null, 4));
                 }
                 if (item.field == "status") {
+                    wip.status = item.fromString;
                 } else if (item.field == "Whiteboard") {
                     // I totally hate Jira. Why is that changelog refers to a field by
                     // human name, with no way to obtain ID in a reliable way?
