@@ -15,7 +15,7 @@ block content
                li(ng-repeat='list in clientConfig.lists')
                  a(href='#/list/{{list.id}}') {{list.name}}
            li.dropdown(data-match-route='/sprint/.*')
-             a(href='#', data-toggle='dropdown').dropdown-toggle Sprints
+             a(href='#', data-toggle='dropdown').dropdown-toggle Sprints 
                b.caret
              ul.dropdown-menu
                li(ng-repeat='sprint in clientConfig.sprints')
