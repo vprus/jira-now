@@ -22,7 +22,7 @@ div(ng-controller='SprintController').sprint
     thead(ng-show='!updatingSprint')
       tr
         th Issue
-        th {{0|iif : "Status so far" : "Status at sprint end"}}
+        th {{inProgress|iif : "Status so far" : "Status at sprint end"}}
         th Effort
 
     tbody
