@@ -67,6 +67,9 @@ angular.module('jiraNow.directives', [])
                     scope.variable = false;
                 }
                 var e = $(element);
+                if (scope.variable) {
+                    e.addClass("pressed");
+                }
                 e.click(function (event) {
                     scope.$apply(function () {
                         if (scope.variable == false) {
@@ -86,14 +89,19 @@ angular.module('jiraNow.directives', [])
     .directive('sprintEndStatus', function() {
         return {
             restrict: 'A',
-            scope: { issue: '=sprintEndStatus' },
+            scope: { issue: '=sprintEndStatus', sprint: '=' },
             link: function(scope, element, attrs) {
                 var issue = scope.issue;
+                var sprint = scope.sprint;
                 var ctx = element[0];
 
                 var state;
                 if (["Resolved"].indexOf(issue.status) != -1) {
-                    state = "<span style='color: green; font-weight: bold'>" + issue.status + "</span>";
+                    state = "<span style='color: green; font-weight: bold'>";
+                    if (issue.statusNow == "Closed")
+                        state += "&#x2713; ";
+                    state += issue.status;
+                    state += "</span>";
                     
                     if (issue.statusNow == "Closed" || issue.statusNow == "Validated") {
                         state = state + " &rarr; " + issue.statusNow;
@@ -102,11 +110,18 @@ angular.module('jiraNow.directives', [])
                     }
                     
                 } else if (["Closed", "Validated"].indexOf(issue.status) != -1) {
-                    state = "<span style='color: green; font-weight: bold'>" + issue.status + "</span>";
+                    state = "<span style='color: green; font-weight: bold'>&#x2713; " + issue.status + "</span>";
                 } else if (issue.whiteboard) {
                     state = issue.whiteboard;
                 } else {
-                    state = "<b>Not specified</b>";
+                    var e = new Date(sprint.end);
+                    var n = new Date();
+                    if (n > e)
+                        state = "<b style='color: red'>Not specified</b>";
+                    else if (n > e - 5*24*60*60*1000) 
+                        state = "<b style='color: red'>Not specified yet</b>";
+                    else
+                        state = "<b>Not specified yet</b>";                        
                 }
 
                 element.html(state);

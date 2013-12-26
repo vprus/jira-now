@@ -182,7 +182,7 @@ table.hide-priority td.priority {
     display: none;
 }
 
-table thead {
+.issue-list table thead {
     display: none;
 }
 
@@ -248,4 +248,8 @@ th .help {
 
 .pressed:hover {
     color: #000000;
+}
+
+h1 span a.icon-question-sign:hover {
+    text-decoration: none;
 }

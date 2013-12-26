@@ -52,4 +52,21 @@ angular.module('jiraNow.filters', [])
         return function(input) {
             return moment(input).from();
         }
+    })
+    .filter('iif', function() {
+        return function(input, thenValue, elseValue) {
+            return input ? thenValue : elseValue;
+        }
+    })
+    .filter('sprintStatusTitle', function () {
+        return function(input) {
+            var now = new Date();
+            var end = new Date(input.end);
+            
+            console.log("input is " + end);
+            if (now.getTime() > end.getTime())
+                return "Status at sprint end";
+            else
+                return "Status so far";
+        };
     });

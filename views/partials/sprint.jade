@@ -1,15 +1,28 @@
 div(ng-controller='SprintController').sprint
 
   span(class='list-header')
-    h1 {{sprint.name}}
-    span(class='description') Sprint accomplishments at end, {{sprint.end | date:'MMM d H:mm'}}
-   
+    h1 {{sprint.name}} 
+      span(ng-cloak, ng-show='inProgress', class='description') In Progress &mdash; 
+      span(class='description') {{sprint.start | date:'MMM d H:mm'}} to {{sprint.end | date:'MMM d H:mm'}}
 
+      span(style='float: right') 
+        a(toggle='showHelp', class='icon-question-sign', href='#')
+
+    div(ng-cloak, ng-show='showHelp', class='help')
+
+        p Shows all issues with logged time during the sprint timeframe, as well as 
+          | modified issues, or those with sprint fixVersion. The status column
+          | shows the state of the issues at the end date of sprint, and for
+          | resolved issues, their fate past the end date - either in QA, or
+          | verified and closed, or in limbo.
+
+        p Click on the question mark to hide this help message.
+                
   table.table(ng-class="{disable: updating == 1}")
-    thead
+    thead(ng-show='!updatingSprint')
       tr
         th Issue
-        th Status at sprint end
+        th {{0|iif : "Status so far" : "Status at sprint end"}}
         th Effort
 
     tbody
@@ -17,7 +30,7 @@ div(ng-controller='SprintController').sprint
         td 
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.summary}} 
-        td(sprint-end-status="issue")
+        td(sprint-end-status="issue",sprint='sprint')
         td {{issue.timeSpent|formatDuration}}
 
 

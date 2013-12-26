@@ -278,20 +278,39 @@ function ListController($scope, $routeParams, List, $cookies)
     }
 }
 
-function SprintController($scope, $routeParams, Sprint)
+function SprintController($scope, $routeParams, $cookies, Sprint)
 {
+    var helpId = "showHelp_sprint";
+    var cookie = $cookies[helpId];
+
+    if (cookie == "false")
+        $scope.showHelp = false;
+    else if (cookie == "true")
+        $scope.showHelp = true;
+    else
+        $scope.showHelp = true;
+
     for (var i = 0; i < $scope.clientConfig.sprints.length; ++i) {
         var sprint = $scope.clientConfig.sprints[i];
-        if (sprint.id == $routeParams.sprint) {
+        if (sprint.id == $routeParams.sprintId) {
             $scope.sprint = sprint;
             break;
         }
     }
 
+    var now = new Date();
+    var end = new Date($scope.sprint.end);
+   
+    $scope.inProgress = (now.getTime() < end.getTime());
+    
     function updateSprint()
     {
         $scope.updatingSprint = 1;
-        $scope.sprint = Sprint.get({id: $routeParams.sprintId}, function() {
+        // If we directly assign to $scope.sprint here, the sprint name
+        // and other interesting things in the template will become empty.
+        // So, wait until after we've loaded the data.
+        var wip = Sprint.get({id: $routeParams.sprintId}, function() {
+            $scope.sprint = wip;            
             $scope.updatingSprint = 0;
         });
     }
@@ -311,6 +330,10 @@ function SprintController($scope, $routeParams, Sprint)
         if (oldVal == 1 && newVal == 0) {
             updateSprint();
         }
+    });
+
+    $scope.$watch('showHelp', function(newVal, oldVal) {
+        $cookies[helpId] = newVal.toString();
     });
 
     updateSprint();
