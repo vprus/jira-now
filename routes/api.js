@@ -778,16 +778,13 @@ function walkBack(issue, date)
         debug = 1;
     }
 
-    var result = {status: issue.fields.status.name, 
-                  whiteboard: issue.fields[config.jira.whiteboardFieldId]};
+    var wip = {status: issue.fields.status.name,
+               whiteboard: issue.fields[config.jira.whiteboardFieldId]};
 
     if (date.getTime() > (new Date()).getTime()) {
         // Requested date is in future - return the current state.
-        return result;
+        return wip;
     }
-
-    var wip = {};
-
     if (issue.changelog) {
         var i = issue.changelog.histories.length-1;
         for(; i >= 0; --i) {
@@ -806,27 +803,13 @@ function walkBack(issue, date)
                     if (item.fromString)
                         wip['whiteboard'] = item.fromString;
                     else
-                        wip['whiteboard'] = "not set";
+                        delete wip['whiteboard'];
                 }
             });
         }
-    }// else {
-    //    wip = {status: 'unknown', whiteboard: 'unknown'};
-    //}
+    }
 
-    if (wip.status) {
-        result.status = wip.status; // + " (now " + result.status + ")";
-    }// else {
-    //    result.status = result.status + " (unchanged since)";
-    //}
-
-    if (wip.whiteboard) {
-        result.whiteboard = wip.whiteboard; /// + " (now " + result.whiteboard + ")";
-    } else {
-        //result.whiteboard = result.whiteboard + " (unchaged since)";
-    }    
-
-    return result;
+    return wip;
 }
 
 function workLogged(issue, since, until)
