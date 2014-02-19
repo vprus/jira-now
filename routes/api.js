@@ -853,3 +853,7 @@ exports.sprint = function(req, res) {
     });    
 }
 
+exports.record_usage = function(req, res) {
+    console.log("Got record usage request");
+    res.json(200, {});
+}
