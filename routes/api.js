@@ -16,6 +16,7 @@ var issues;
 var lists;
 var structures;
 var sprints;
+var uses;
 
 var metaCollection;
 var meta;
@@ -64,6 +65,14 @@ MongoClient.connect(config.mongo.url, function(err, d) {
                 return;
             }
             sprints = _sprints;
+        });
+
+        db.collection('uses', function(err, _uses) {
+            if (err) {
+                console.log("Could not open uses collection : " + err);
+                return;
+            }
+            uses = _uses;
         });
 
         db.collection('meta', function(err, _meta) {
@@ -855,5 +864,11 @@ exports.sprint = function(req, res) {
 
 exports.record_usage = function(req, res) {
     console.log("Got record usage request");
-    res.json(200, {});
+    uses.save(req.body, function(err, document) {
+        if (err) {
+            res.send(500, err);
+        } else {
+            res.json(200, {});
+        }
+    });
 }
