@@ -863,10 +863,13 @@ exports.sprint = function(req, res) {
 }
 
 exports.record_usage = function(req, res) {
-    console.log("Got record usage request");
-    uses.save(req.body, function(err, document) {
-        if (err) {
-            res.send(500, err);
+    uses.save(req.body, function(error, document) {
+        if (error) {
+            // MongoDB will pass instance of class Error, which
+            // Express will send as JSON, which would be actually
+            // empty, as Error is a builtin class with no properties.
+            // Use toString to force a message to become apparent.
+            res.send(500, error.toString() + "\n");
         } else {
             res.json(200, {});
         }
