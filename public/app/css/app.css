@@ -253,3 +253,21 @@ th .help {
 h1 span a.icon-question-sign:hover {
     text-decoration: none;
 }
+
+#timesheet table {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#automatic-report div {
+    margin: 0;
+}
+
+.week-dropdown {
+    border-top: 4px solid #999999;
+    vertical-align: middle;
+}
+
+.timesheet-table small {
+    color: #999999;
+}

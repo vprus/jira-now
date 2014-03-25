@@ -34,8 +34,8 @@ block content
                li
                  a(href='#/week/since/{{previousTeamCall.toISOString()}}') Since Previous Team Call ({{previousTeamCall | date: 'MMM d'}})
 
-
-
+            li.ng-cloak(ng-show='session.username', data-match-route='/personal/.*')
+              a(href="#/personal/{{session.username}}") Personal
           ul.nav.pull-right
            li 
              a(digester='1000', context='meta', ng-click='$parent.updateIssues()') {{$parent.updatedLabel()}}

@@ -38,6 +38,14 @@ angular.module('jiraNow.filters', [])
             return Math.ceil(input/60/60);
         }
     })
+    .filter('formatHoursPreciseNz', function() {
+        return function(input) {
+            if (input == undefined || input == 0)
+                return "";
+
+            return (input/60/60).toPrecision(2);
+        }
+    })
     .filter('updatedAgo', function($q) {
         return function(input) {
             if (!input)

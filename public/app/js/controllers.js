@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-function AppController($scope, $http, $timeout, sprintSchedule) {
+function AppController($scope, $http, $timeout, $cookies, sprintSchedule) {
 
     $scope.loaded = 0;
 
@@ -63,7 +63,105 @@ function AppController($scope, $http, $timeout, sprintSchedule) {
     updateTimes();
 }
 
-function WeekController($scope, $routeParams, Week) {
+
+
+function PersonalController($scope, $routeParams, Worklog) {
+
+    var week = $routeParams.week;
+    var user = $routeParams.user;
+
+    var start = moment(week);
+    var monday = moment(week).startOf('isoWeek');
+
+    if (!start.isSame(monday)) {
+        // FIXME: improve wording.
+        $scope.error = "Not a monday";
+    }
+       
+    start.hour(5);
+    var end = moment(start);
+    end.add('days', 7);
+    $scope.start = start;
+
+    $scope.dates = []
+    for (var i = 0; i < 7; ++i)
+    {
+        var thisDay = moment(start);
+        thisDay.add('days', i);
+        $scope.dates.push(thisDay.date());
+    }
+
+
+
+    console.log("XXX " + start.toISOString() + " - " + end.toISOString());
+    
+
+    // FIXME: make sure 'week' is actually monday.
+
+    $scope.fullName = "Vladimir Prus"
+    $scope.week = $routeParams.week;
+
+    $scope.workedIssues = 0;
+    $scope.workedSeconds = 0;
+
+    $scope.perIssuePerDay = {}
+    $scope.dayTotal = {0: 0, 1: 0, 2:0, 3: 0, 4: 0, 5: 0, 6: 0};
+
+    var params = {
+        since: start.toISOString(), 
+        until: end.toISOString(),
+        users: user
+    };
+    $scope.issues = Worklog.query(params, function() {
+            
+        $scope.workedIssues = $scope.issues.length;
+        var seconds = 0;
+        var f = $scope.issues;
+        for (var i = 0; i < f.length; ++i) {
+            var issue = f[i];
+            issue.total = issue.totals[user];
+            issue.log.forEach(function (item) {
+                if (item.timeSpentSeconds) {
+                    seconds = seconds + item.timeSpentSeconds;
+
+                    var day = (new Date(item.date)).getDay();
+                    issue.perDay = issue.perDay || {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+                    issue.perDay[day] = (issue.perDay[day] || 0) + item.timeSpentSeconds;
+                    $scope.dayTotal[day] = $scope.dayTotal[day] + item.timeSpentSeconds;
+                }
+            });  
+            console.log("Per day " + issue.key + " : " + issue.perDay);
+        }
+        $scope.workedSeconds = seconds;
+    });
+
+    $scope.issueFilter = function(issue) {
+        for (var i = 0; i < issue.log.length; ++i) {
+            var entry = issue.log[i];
+            if (entry.author == user)
+                return true;
+        }
+        return false;
+    }
+
+    $scope.issueFilterWithTime = function(issue) {
+        return $scope.issueFilter(issue) && issue.totals[user] > 0;
+    }
+
+
+    // FIXME: reuse.
+    $scope.issueTotalHours = function(issue) {
+        return issue.totals[user];
+    }
+
+    $scope.logFilter = function(item) { 
+        return item.author == user;
+    };     
+
+
+}
+
+function WeekController($scope, $routeParams, Worklog) {
     // FIXME: figure why it's invoked twice.
     console.log("WeekController");
 
@@ -73,6 +171,9 @@ function WeekController($scope, $routeParams, Week) {
     }
 
     $scope.since = $routeParams.since;
+    
+    var until = moment($scope.since);
+    until.add('days', 7);
 
     console.log("Date is " + $scope.since);
 
@@ -130,7 +231,12 @@ function WeekController($scope, $routeParams, Week) {
         $scope.updateCounters();
     }
 
-    $scope.issues = Week.query({since: $scope.since, users: $scope.users.join(',')}, function() {
+    var params = {
+        since: $scope.since, 
+        until: until.toISOString(),
+        users: $scope.users.join(',')
+    };
+    $scope.issues = Worklog.query(params, function() {
         $scope.updateCounters();
     });
 }

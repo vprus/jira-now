@@ -595,6 +595,20 @@ exports.update = function(req, res) {
     function updateAllChanged(callback) {
         var query = "project in (" + config.jira.projects.join(',') + ") and updated>" + since;
         queryAndSaveIssues(query, callback);
+
+        /*
+        var missing = issues.find({'changelog': {$exists: false}});
+        missing.each(function(err, doc) {
+            if (err) {
+                console.log("Error " + err);
+            } else {
+                if (doc && doc.key.indexOf("CB") == 0) {
+                    console.log("Missing changelog in " + doc.key);
+                    queryAndSaveIssues("key=" + doc.key, function() {});
+                }
+            }
+        });
+        */
     }
 
     function updateStructureFactory(structure_id) {
@@ -710,12 +724,18 @@ exports.changes = function(req, res) {
     var users = req.query.user;
     var since = new Date(req.query.since);
     var until = new Date(req.query.until);
-    console.log("Until " + until.toString());
 
     if (users) {
         users = users.split(',')
     } else {
         users = [];
+    }
+
+    if (users.length == 1) {
+        if (req.session.username != users[0]) {
+            res.send(403, 'Access to worklog of others is forbidden');
+            return;
+        }
     }
     
     var createdMatch = {'fields.created': {$gte: since},

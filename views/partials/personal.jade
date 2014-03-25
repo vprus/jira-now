@@ -1,0 +1,98 @@
+div(ng-controller='PersonalController')
+  
+  div.span12      
+
+   h1 {{fullName}} 
+       small Week of {{week | date:'yyyy-MM-d'}} 
+
+     //- 
+       div.dropdown(id='week-dropdown')
+           small Week of {{week | date:'yyyy-M-d'}} 
+               a.dropdown-toggle(data-toggle='dropdown', data-target='week-dropdown')
+                 span.caret.week-dropdown
+           ul.dropdown-menu(role='menu')
+              li This week
+              li That week
+
+   span {{error}}
+
+   div.counter
+      strong {{workedSeconds|formatHours}}
+      p hours
+
+   div.counter
+      strong {{workedIssues}}
+      p issues
+
+   ul.nav.nav-pills
+      li.active
+         a(href='#automatic-report', data-toggle='tab') List
+      li
+         a(href='#timesheet', data-toggle='tab') Timesheet
+      li
+         a(href='#') Written Report
+
+   div.tab-content
+    div.tab-pane.active(id='automatic-report')
+      div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true").span12
+
+          b
+             a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
+             | : {{issue.summary}} 
+             span(ng-show="issueTotalHours(issue)") - {{issueTotalHours(issue)|formatDuration}}
+
+          ul
+             li(ng-repeat="log in issue.log | filter:logFilter") 
+               span(ng-show="log.timeSpentSeconds")          
+                 b {{log.timeSpentSeconds|formatDuration}} 
+                 |  ({{log.date | date:'MMM d'}}) 
+               | {{log.comment}}
+     
+    div.tab-pane(id='timesheet')
+
+       table.table.timesheet-table(ng-class="{disabled: updating == 1 || updatingList == 1, 'hide-priority': !list.priority}").span12
+        thead
+          tr
+            th Issue
+            th Monday 
+                small {{dates[0]}}
+            th Tuesday 
+                small {{dates[1]}}
+            th Wednesday 
+                small {{dates[2]}}
+            th Thursday 
+                small {{dates[3]}}
+            th Friday 
+                small {{dates[4]}}
+            th Saturday 
+                small {{dates[5]}}
+            th Sunday 
+                small {{dates[6]}}
+            th Total
+    
+        tbody
+          tr(ng-repeat='issue in issues | filter:issueFilterWithTime | orderBy:issueTotalHours:true', ng-switch="1") 
+            td {{issue.summary}}
+            td {{issue.perDay[1]|formatHoursPreciseNz}}
+            td {{issue.perDay[2]|formatHoursPreciseNz}}
+            td {{issue.perDay[3]|formatHoursPreciseNz}}
+            td {{issue.perDay[4]|formatHoursPreciseNz}}
+            td {{issue.perDay[5]|formatHoursPreciseNz}}
+            td {{issue.perDay[6]|formatHoursPreciseNz}}
+            td {{issue.perDay[0]|formatHoursPreciseNz}}
+            td {{issue.total|formatHoursPreciseNz}}
+    
+          tr
+           td Day total
+           td {{dayTotal[1]|formatHours}} 
+           td {{dayTotal[2]|formatHours}} 
+           td {{dayTotal[3]|formatHours}} 
+           td {{dayTotal[4]|formatHours}} 
+           td {{dayTotal[5]|formatHours}} 
+           td {{dayTotal[6]|formatHours}} 
+           td {{dayTotal[0]|formatHours}}
+           td {{workedSeconds|formatHours}} 
+    
+    div.tab-pane(id='written-report')
+
+        p This great functionality is not yet implemented

@@ -11,6 +11,11 @@ angular.module('jiraNow.services', ['ngResource'])
             query: {method:'GET', params:{}, isArray:true}
         });
     })
+    .factory('Worklog', function($resource) {
+        return $resource('api/changes?user=:users&since=:since&until=:until', {}, {
+            query: {method:'GET', params:{}, isArray:true}
+        });
+    })
     .factory('List', function($resource) {
         return $resource('api/list/?id=:id', {}, {
             query: {method:'GET', params:{}, isArray:true}
@@ -22,7 +27,7 @@ angular.module('jiraNow.services', ['ngResource'])
         });
     })
 ;
-        
+     
 
 
 
