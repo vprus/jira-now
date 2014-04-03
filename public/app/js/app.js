@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('jiraNow', ['jiraNow.filters', 'jiraNow.services', 'jiraNow.directives', 'developmentProcess', "$strap.directives", "ngCookies"])
+angular.module('jiraNow', ['ngRoute', 'jiraNow.filters', 'jiraNow.services', 'jiraNow.directives', 'developmentProcess', "$strap.directives", "ngCookies"])
     .config(
         ['$routeProvider', function($routeProvider) {
             console.log("Init router");
