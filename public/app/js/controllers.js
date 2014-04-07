@@ -14,6 +14,10 @@ function AppController($scope, $http, $timeout, sprintSchedule) {
         .success(function(data, status, headers, config) {
             $scope.meta = data;
         });
+    $http({method: 'GET', url: '/api/session'})
+        .success(function(data, status, headers, config) {
+            $scope.session = data;
+        });
     $http({method: 'GET', url: '/api/clientConfig'})
         .success(function(data, status, headers, config) {
             $scope.clientConfig = data;

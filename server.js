@@ -1,9 +1,14 @@
 
-var express = require('express'),
-  routes = require('./routes'),
-  api = require('./routes/api');
+var config = require('./config');
 
-var app = module.exports = express();
+var express = require('express'),
+    routes = require('./routes'),
+    api = require('./routes/api'),
+    oauth = require('./routes/oauth');
+var MongoStore = require('connect-mongo-store')(express)
+
+var app = express();
+// FIXME: set TTL.
 
 // Configuration
 
@@ -13,9 +18,13 @@ app.configure(function(){
   app.set('view engine', 'jade');
   app.use(express.bodyParser());
   app.use(express.cookieParser());
+  app.use(express.session({
+      store: new MongoStore(config.mongo.url),
+      secret: "79437aa4c747d7b1a2b4348",
+      cookie: {maxAge: 1000*60*60*24*100},
+  }));
   app.use(express.methodOverride());
   app.use(express.static(__dirname + '/public'));
-  app.use(app.router);
 });
 
 app.configure('development', function(){
@@ -26,6 +35,10 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
+// OAuth
+app.get('/login', oauth.login);
+app.get('/oauth', oauth.callback);
+
 // Routes for HTML pages
 app.get('/', routes.index);
 app.get('/partials/:name', routes.partials);
@@ -33,12 +46,14 @@ app.get('/partials/:name', routes.partials);
 // Magic URL for initial setup
 app.get('/setup/:clientConfig', routes.setup);
 
+
 // Before doing any API calls, do some basic checks
 app.get('/api/*', api.check)
 app.post('/api/*', api.check)
 
 // Actual API calls
 app.get('/api/status', api.status);
+app.get('/api/session', api.session);
 app.get('/api/clientConfig', api.clientConfig);
 app.get('/api/changes', api.changes)
 app.get('/api/list', api.list)

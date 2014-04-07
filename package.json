@@ -5,10 +5,12 @@
   , "dependencies": {
       "express": "3.0.0"
     , "jade": ">= 0.0.1"
+    , "connect-mongo-store": "0.1.8"
     , "mongodb": "*"
     , "jira": "0.4.0"
     , "request": ">=2.2.0"
     , "async": "*"
     , "moment": "*"
-  }
+    , "oauth": "https://github.com/vprus/node-oauth/archive/0.9.1.tar.gz"
+  }   
 }

@@ -1,7 +1,6 @@
 // This module implements all of the REST API.
 
 var config = require('../config')
-
 var request = require('request');
 var async = require('async');
 var moment = require('moment');
@@ -178,7 +177,7 @@ function queryMinimal(query, callback)
     maxResults = 500;
     var options = {
         maxResults: 500, 
-        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", config.jira.whiteboardFieldId],
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", "aggregatetimespent", config.jira.whiteboardFieldId],
     }
     jira.searchJira(query, options, function(error, jd) {
 
@@ -652,6 +651,14 @@ exports.status = function(req, res) {
     res.json(meta);
 }
 
+exports.session = function(req, res) {
+    if (req.session) {
+        res.json({username: req.session.username, fullName: req.session.fullName});
+    } else {
+        res.json({});
+    }
+}
+
 exports.clientConfig = function(req, res) {
     console.log("clientConfig, cookie is ", req.cookies['clientConfig']);
     var clientConfig = req.cookies['clientConfig'];
@@ -661,7 +668,7 @@ exports.clientConfig = function(req, res) {
     res.json(config.clientConfigs[clientConfig]);
 }
 
-function processChanges(changes, since, users)
+function processChanges(changes, since, until, users)
 {
     if (users.length)
         changes = changes.filter(function(c) { return users.indexOf(c.updateAuthor.name) != -1; });
@@ -671,7 +678,7 @@ function processChanges(changes, since, users)
             d = c.started;
         else
             d = c.created;
-        return d.getTime() > since.getTime(); 
+        return d.getTime() >= since.getTime() && d.getTime() < until.getTime();
     });
     return changes.map(function(c) { 
         var result = {
@@ -702,6 +709,8 @@ exports.changes = function(req, res) {
     }
     var users = req.query.user;
     var since = new Date(req.query.since);
+    var until = new Date(req.query.until);
+    console.log("Until " + until.toString());
 
     if (users) {
         users = users.split(',')
@@ -709,10 +718,10 @@ exports.changes = function(req, res) {
         users = [];
     }
     
-    var createdMatch = {'fields.created': {$gt: since},
+    var createdMatch = {'fields.created': {$gte: since},
                         'fields.reporter.name': {$in: users}};
 
-    var elemMatch = {$elemMatch: {'created': {$gt: since}}};
+    var elemMatch = {$elemMatch: {$and: [{'created': {$gte: since}}, {'created': {$lt: until}}]}};
     if (users) {
         elemMatch.$elemMatch['updateAuthor.name'] = {$in: users};
     }
@@ -721,9 +730,12 @@ exports.changes = function(req, res) {
         $or: [createdMatch, {'fields.comment.comments': elemMatch}, {'fields.worklog.worklogs': elemMatch}]
     });
 
-    comments.explain(function(err, explanation) {
-        console.log(JSON.stringify(explanation));
-    });
+//    comments.explain(function(err, explanation) {
+//        if (err) {
+//            console.log(err);
+//        }
+//        console.log(JSON.stringify(explanation));
+//    });
 
     var result = [];
     comments.each(function(err, issue) {
@@ -732,15 +744,16 @@ exports.changes = function(req, res) {
         } else {
             var log = []
             
-            if (issue.fields.created.getTime() > since.getTime()) {
+            var ct = issue.fields.created.getTime();
+            if (ct >= since.getTime() && ct < until.getTime()) {
                 log.push({author: issue.fields.reporter.name, date: issue.fields.created, comment: '(Created)'});
             }
 
             if (issue.fields.comment.comments) {
-                log = log.concat(processChanges(issue.fields.comment.comments, since, users));
+                log = log.concat(processChanges(issue.fields.comment.comments, since, until, users));
             }
             if (issue.fields.worklog.worklogs) {
-                log = log.concat(processChanges(issue.fields.worklog.worklogs, since, users));
+                log = log.concat(processChanges(issue.fields.worklog.worklogs, since, until, users));
             }
             log.sort(function(a, b) { return a.date.getTime() - b.date.getTime(); });
 
