@@ -90,10 +90,6 @@ function PersonalController($scope, $routeParams, Worklog) {
         $scope.dates.push(thisDay.date());
     }
 
-
-
-    console.log("XXX " + start.toISOString() + " - " + end.toISOString());
-    
     $scope.fullName = $scope.session.fullName
     $scope.week = $routeParams.week;
 
@@ -170,8 +166,6 @@ function WeekController($scope, $routeParams, Worklog) {
     
     var until = moment($scope.since);
     until.add('days', 7);
-
-    console.log("Date is " + $scope.since);
 
     $scope.selectedUsers = {};
     $scope.workedIssues = 0;
@@ -275,7 +269,6 @@ function ListController($scope, $routeParams, List, $cookies)
             else
                 users[name] = users[name] + 1;
         });
-        console.log("users " + JSON.stringify(users, null, 4));
 
         function realName(name) {
             var rn;
