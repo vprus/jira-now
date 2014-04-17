@@ -68,8 +68,7 @@ function AppController($scope, $http, $timeout, $cookies, sprintSchedule) {
 function PersonalController($scope, $routeParams, Worklog) {
 
     var week = $routeParams.week;
-    var user = $routeParams.user;
-
+    var user = $scope.session.username;
     var start = moment(week);
     var monday = moment(week).startOf('isoWeek');
 
@@ -95,10 +94,7 @@ function PersonalController($scope, $routeParams, Worklog) {
 
     console.log("XXX " + start.toISOString() + " - " + end.toISOString());
     
-
-    // FIXME: make sure 'week' is actually monday.
-
-    $scope.fullName = "Vladimir Prus"
+    $scope.fullName = $scope.session.fullName
     $scope.week = $routeParams.week;
 
     $scope.workedIssues = 0;
