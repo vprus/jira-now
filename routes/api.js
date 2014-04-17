@@ -741,13 +741,24 @@ exports.changes = function(req, res) {
     var createdMatch = {'fields.created': {$gte: since},
                         'fields.reporter.name': {$in: users}};
 
-    var elemMatch = {$elemMatch: {$and: [{'created': {$gte: since}}, {'created': {$lt: until}}]}};
+    var elemMatchCreated =
+        {$elemMatch: {$and: [{'created': {$gte: since}}, {'created': {$lt: until}}]}};
+    var elemMatchStarted =
+        {$elemMatch: {$and: [{'started': {$gte: since}}, {'started': {$lt: until}}]}};
+
     if (users) {
-        elemMatch.$elemMatch['updateAuthor.name'] = {$in: users};
+        elemMatchCreated.$elemMatch['updateAuthor.name'] = {$in: users};
+        elemMatchStarted.$elemMatch['updateAuthor.name'] = {$in: users};
     }
 
     var comments = issues.find({
-        $or: [createdMatch, {'fields.comment.comments': elemMatch}, {'fields.worklog.worklogs': elemMatch}]
+        $or: [
+            createdMatch,
+            {'fields.comment.comments': elemMatchCreated},
+            // Worklog have separate field to indicate when the work was started,
+            // as opposed to when worklog entry was created. Check on that one.
+            {'fields.worklog.worklogs': elemMatchStarted}
+        ]
     });
 
 //    comments.explain(function(err, explanation) {
@@ -763,7 +774,7 @@ exports.changes = function(req, res) {
             res.json(result);
         } else {
             var log = []
-            
+
             var ct = issue.fields.created.getTime();
             if (ct >= since.getTime() && ct < until.getTime()) {
                 log.push({author: issue.fields.reporter.name, date: issue.fields.created, comment: '(Created)'});
