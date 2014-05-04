@@ -150,6 +150,22 @@ function PersonalController($scope, $routeParams, Worklog) {
         return item.author == user;
     };     
 
+    $scope.timesheetSelect = function(key, day) {
+
+	$scope.timesheetCellDetails = [];
+	for (var i = 0; i < $scope.issues.length; ++i) {
+	    if ($scope.issues[i].key == key) {
+		var issue = $scope.issues[i];
+		for (var j = 0; j < issue.log.length; ++j) {
+		    var item = issue.log[j];
+                    var thisDay = (new Date(item.date)).getDay();
+		    if (thisDay == day)
+			$scope.timesheetCellDetails.push(item);
+		}
+		break;
+	    }
+	}
+    }
 
 }
 

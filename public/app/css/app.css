@@ -271,3 +271,19 @@ h1 span a.icon-question-sign:hover {
 .timesheet-table small {
     color: #999999;
 }
+
+.timesheet-table tr td:not(:first-child) {
+    text-align: center;
+}
+
+.timesheet-table tr th:not(:first-child) {
+    text-align: center;
+}
+
+.timesheet-table.active {
+    background-color: blue
+}
+
+.timesheet-leaf {
+    cursor: pointer;
+}

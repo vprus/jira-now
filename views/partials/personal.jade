@@ -73,13 +73,13 @@ div(ng-controller='PersonalController')
         tbody
           tr(ng-repeat='issue in issues | filter:issueFilterWithTime | orderBy:issueTotalHours:true', ng-switch="1") 
             td {{issue.summary}}
-            td {{issue.perDay[1]|formatHoursPreciseNz}}
-            td {{issue.perDay[2]|formatHoursPreciseNz}}
-            td {{issue.perDay[3]|formatHoursPreciseNz}}
-            td {{issue.perDay[4]|formatHoursPreciseNz}}
-            td {{issue.perDay[5]|formatHoursPreciseNz}}
-            td {{issue.perDay[6]|formatHoursPreciseNz}}
-            td {{issue.perDay[0]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 1)") {{issue.perDay[1]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 2)") {{issue.perDay[2]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 3)") {{issue.perDay[3]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 4)") {{issue.perDay[4]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 5)") {{issue.perDay[5]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 6)") {{issue.perDay[6]|formatHoursPreciseNz}}
+            td.timesheet-leaf(ng-click="timesheetSelect(issue.key, 0)") {{issue.perDay[0]|formatHoursPreciseNz}}
             td {{issue.total|formatHoursPreciseNz}}
     
           tr
@@ -92,7 +92,14 @@ div(ng-controller='PersonalController')
            td {{dayTotal[6]|formatHours}} 
            td {{dayTotal[0]|formatHours}}
            td {{workedSeconds|formatHours}} 
-    
+
+    li(ng-repeat="log in timesheetCellDetails") 
+               span(ng-show="log.timeSpentSeconds")          
+                 b {{log.timeSpentSeconds|formatDuration}} 
+                 |  ({{log.date | date:'MMM d'}}) 
+               | {{log.comment}}
+     
+
     div.tab-pane(id='written-report')
 
         p This great functionality is not yet implemented
