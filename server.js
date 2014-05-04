@@ -19,7 +19,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(express.session({
-      store: new MongoStore(config.mongo.url),
+      store: new MongoStore(config.mongo.url, {ttl: 60*60*24*30}),
       secret: "79437aa4c747d7b1a2b4348",
       cookie: {maxAge: 1000*60*60*24*100},
   }));
