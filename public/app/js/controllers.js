@@ -90,6 +90,7 @@ function PersonalController($scope, $routeParams, Worklog) {
         $scope.dates.push(thisDay.date());
     }
 
+    $scope.user = user;
     $scope.fullName = $scope.session.fullName
     $scope.week = $routeParams.week;
 
@@ -104,69 +105,22 @@ function PersonalController($scope, $routeParams, Worklog) {
         until: end.toISOString(),
         users: user
     };
-    $scope.issues = Worklog.query(params, function() {
+
+    $scope.issues = [];
+    var seconds = 0;
+    var issuesPromise = Worklog.query(params, function() {
             
+	$scope.issues = issuesPromise;
         $scope.workedIssues = $scope.issues.length;
-        var seconds = 0;
-        var f = $scope.issues;
-        for (var i = 0; i < f.length; ++i) {
-            var issue = f[i];
-            issue.total = issue.totals[user];
-            issue.log.forEach(function (item) {
+	$scope.issues.forEach(function (issue) {
+	    issue.log.forEach(function (item) {
                 if (item.timeSpentSeconds) {
                     seconds = seconds + item.timeSpentSeconds;
-
-                    var day = (new Date(item.date)).getDay();
-                    issue.perDay = issue.perDay || {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
-                    issue.perDay[day] = (issue.perDay[day] || 0) + item.timeSpentSeconds;
-                    $scope.dayTotal[day] = $scope.dayTotal[day] + item.timeSpentSeconds;
                 }
-            });  
-            console.log("Per day " + issue.key + " : " + issue.perDay);
-        }
+            })
+	});
         $scope.workedSeconds = seconds;
     });
-
-    $scope.issueFilter = function(issue) {
-        for (var i = 0; i < issue.log.length; ++i) {
-            var entry = issue.log[i];
-            if (entry.author == user)
-                return true;
-        }
-        return false;
-    }
-
-    $scope.issueFilterWithTime = function(issue) {
-        return $scope.issueFilter(issue) && issue.totals[user] > 0;
-    }
-
-
-    // FIXME: reuse.
-    $scope.issueTotalHours = function(issue) {
-        return issue.totals[user];
-    }
-
-    $scope.logFilter = function(item) { 
-        return item.author == user;
-    };     
-
-    $scope.timesheetSelect = function(key, day) {
-
-	$scope.timesheetCellDetails = [];
-	for (var i = 0; i < $scope.issues.length; ++i) {
-	    if ($scope.issues[i].key == key) {
-		var issue = $scope.issues[i];
-		for (var j = 0; j < issue.log.length; ++j) {
-		    var item = issue.log[j];
-                    var thisDay = (new Date(item.date)).getDay();
-		    if (thisDay == day)
-			$scope.timesheetCellDetails.push(item);
-		}
-		break;
-	    }
-	}
-    }
-
 }
 
 function WeekController($scope, $routeParams, Worklog) {

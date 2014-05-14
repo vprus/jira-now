@@ -280,8 +280,8 @@ h1 span a.icon-question-sign:hover {
     text-align: center;
 }
 
-.timesheet-table.active {
-    background-color: blue
+.timesheet-table .timesheet-leaf.active {
+    background-color: #8fb8cc;
 }
 
 .timesheet-leaf {

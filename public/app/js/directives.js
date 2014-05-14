@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('jiraNow.directives', [])
+angular.module('jiraNow.directives', ['ng'])
     .directive('digester', function() {
         var digester = {
             replace: false,
@@ -127,6 +127,99 @@ angular.module('jiraNow.directives', [])
                 element.html(state);
             }
         };
+    })
+    .directive('timesheet', function() {
+	return {
+	    restrict: 'E',
+	    scope: {
+		data: "=",
+		start: "=",
+		user: "=",
+	    },
+	    templateUrl: "partials/timesheet.jade",
+	    link: function(scope, element, attrs) {
+		scope.count = 0;
+		scope.updates = 0;
+		scope.dates = []
+		for (var i = 0; i < 7; ++i)
+		{
+		    var thisDay = moment(scope.start);
+		    thisDay.add('days', i);
+		    scope.dates.push(thisDay.date());
+		}
+
+
+		console.log("Link function");
+		
+		scope.$watch('data', function(issues, oldValue) {
+		    console.log("Data updated");
+
+		    scope.count = issues.length;
+		    scope.updates = scope.updates + 1;
+
+		    scope.workedIssues = 0;
+		    scope.workedSeconds = 0;
+
+		    scope.perIssuePerDay = {}
+		    scope.dayTotal = {0: 0, 1: 0, 2:0, 3: 0, 4: 0, 5: 0, 6: 0};
+   
+		    var seconds = 0;
+		    for (var i = 0; i < issues.length; ++i) {
+			var issue = issues[i];
+			issue.total = issue.totals[scope.user];
+			issue.perDay = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+			issue.log.forEach(function (item) {
+			    if (item.timeSpentSeconds) {
+				seconds = seconds + item.timeSpentSeconds;
+				var day = (new Date(item.date)).getDay();
+				issue.perDay[day] = (issue.perDay[day] || 0) + item.timeSpentSeconds;
+				scope.dayTotal[day] = scope.dayTotal[day] + item.timeSpentSeconds;
+			    }
+			});  
+			console.log("Per day " + issue.key + " : " + issue.perDay);
+
+		    }
+		    scope.workedSeconds = seconds;
+		    scope.issues = issues.filter(function(issue) { return issue.total > 0; });
+		    scope.issues.sort(function(a, b) { return b.total - a.total; });
+		});
+
+		scope.timesheetSelect = function($event, key, day) {
+
+		    var newCell = $($event.target);
+		    
+		    if (scope.activeCell) {
+			scope.activeCell.removeClass("active");
+		    }
+
+		    if ($event.target == scope.activeCellRaw) {
+			scope.activeCellRaw = null;
+			scope.activeCell = null;
+			scope.timesheetCellDetails = [];
+			return;
+		    }
+
+		    scope.activeCellRaw = $event.target;
+		    scope.activeCell = $($event.target);
+		    scope.activeCell.addClass("active");
+
+		    scope.timesheetCellDetails = [];
+		    for (var i = 0; i < scope.issues.length; ++i) {
+			if (scope.issues[i].key == key) {
+			    var issue = scope.issues[i];
+			    for (var j = 0; j < issue.log.length; ++j) {
+				var item = issue.log[j];
+				var thisDay = (new Date(item.date)).getDay();
+				if (thisDay == day)
+				    scope.timesheetCellDetails.push(item);
+			    }
+			    break;
+			}
+		    }
+		}
+
+	    }	    
+	};
     });
 
 

@@ -1,0 +1,48 @@
+table.table.timesheet-table(ng-class="{disabled: updating == 1 || updatingList == 1, 'hide-priority': !list.priority}").span12
+    thead
+      tr
+        th Issue
+        th Monday 
+            small {{dates[0]}}
+        th Tuesday 
+            small {{dates[1]}}
+        th Wednesday 
+            small {{dates[2]}}
+        th Thursday 
+            small {{dates[3]}}
+        th Friday 
+            small {{dates[4]}}
+        th Saturday 
+            small {{dates[5]}}
+        th Sunday 
+            small {{dates[6]}}
+        th Total
+
+    tbody
+      tr(ng-repeat='issue in issues', ng-switch="1") 
+        td {{issue.summary}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event, issue.key, 1)") {{issue.perDay[1]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 2)") {{issue.perDay[2]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 3)") {{issue.perDay[3]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 4)") {{issue.perDay[4]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 5)") {{issue.perDay[5]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 6)") {{issue.perDay[6]|formatHoursPreciseNz}}
+        td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 0)") {{issue.perDay[0]|formatHoursPreciseNz}}
+        td {{issue.total|formatHoursPreciseNz}}
+
+      tr
+       td Day total
+       td {{dayTotal[1]|formatHours}} 
+       td {{dayTotal[2]|formatHours}} 
+       td {{dayTotal[3]|formatHours}} 
+       td {{dayTotal[4]|formatHours}} 
+       td {{dayTotal[5]|formatHours}} 
+       td {{dayTotal[6]|formatHours}} 
+       td {{dayTotal[0]|formatHours}}
+       td {{workedSeconds|formatHours}} 
+
+li(ng-repeat="log in timesheetCellDetails") 
+           span(ng-show="log.timeSpentSeconds")          
+             b {{log.timeSpentSeconds|formatDuration}} 
+             |  ({{log.date | date:'MMM d'}}) 
+           | {{log.comment}}
