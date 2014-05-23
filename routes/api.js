@@ -738,8 +738,13 @@ exports.changes = function(req, res) {
         }
     }
     
-    var createdMatch = {'fields.created': {$gte: since},
-                        'fields.reporter.name': {$in: users}};
+    var createdMatch = {
+	$and: [
+	    {'fields.created': {$gte: since}},
+	    {'fields.created': {$lt: until}}
+	],
+        'fields.reporter.name': {$in: users}
+    };
 
     var elemMatchCreated =
         {$elemMatch: {$and: [{'created': {$gte: since}}, {'created': {$lt: until}}]}};
