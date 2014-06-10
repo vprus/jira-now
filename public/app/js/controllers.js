@@ -64,7 +64,6 @@ function AppController($scope, $http, $timeout, $cookies, sprintSchedule) {
 }
 
 
-
 function PersonalController($scope, $routeParams, Worklog) {
 
     var week = $routeParams.week;
@@ -93,6 +92,8 @@ function PersonalController($scope, $routeParams, Worklog) {
     $scope.user = user;
     $scope.fullName = $scope.session.fullName
     $scope.week = $routeParams.week;
+    $scope.previousWeek = moment(monday).subtract('days', 7).format('YYYY-MM-DD');
+    $scope.nextWeek = moment(monday).add('days', 7).format('YYYY-MM-DD');
 
     $scope.workedIssues = 0;
     $scope.workedSeconds = 0;
@@ -106,6 +107,22 @@ function PersonalController($scope, $routeParams, Worklog) {
         users: user
     };
 
+    $scope.reportLogFilter = function(log) {
+	if (log.comment == '(Created)')
+	    return 0;
+
+	return 1;
+    }
+
+    $scope.reportIssueFilter = function(issue) {
+	//return issue.includeInReport;
+	return 1;
+    }
+
+    $scope.issueWorkedSeconds = function(issue) {
+	return issue.seconds;
+    }
+
     $scope.issues = [];
     var seconds = 0;
     var issuesPromise = Worklog.query(params, function() {
@@ -113,10 +130,15 @@ function PersonalController($scope, $routeParams, Worklog) {
 	$scope.issues = issuesPromise;
         $scope.workedIssues = $scope.issues.length;
 	$scope.issues.forEach(function (issue) {
+	    issue.includeInReport = 0;
+	    issue.seconds = 0;
 	    issue.log.forEach(function (item) {
                 if (item.timeSpentSeconds) {
+		    issue.seconds = issue.seconds + item.timeSpentSeconds;
                     seconds = seconds + item.timeSpentSeconds;
                 }
+		if (!issue.includeInReport && $scope.reportLogFilter(item))
+		    issue.includeInReport = 1;
             })
 	});
         $scope.workedSeconds = seconds;
@@ -124,17 +146,37 @@ function PersonalController($scope, $routeParams, Worklog) {
 }
 
 function WeekController($scope, $routeParams, Worklog) {
+
+    var week = $routeParams.week;
+    var start = moment(week);
+    var monday = moment(week).startOf('isoWeek');
+
+    if (!start.isSame(monday)) {
+        // FIXME: improve wording.
+        $scope.error = "Not a monday";
+    }
+       
+    start.hour(5);
+    var end = moment(start);
+    end.add('days', 7);
+    $scope.start = start;
+
+    $scope.week = $routeParams.week;
+    $scope.previousWeek = moment(monday).subtract('days', 7).format('YYYY-MM-DD');
+    $scope.nextWeek = moment(monday).add('days', 7).format('YYYY-MM-DD');
+
+
     // FIXME: figure why it's invoked twice.
     console.log("WeekController");
 
     $scope.users = []    
+    $scope.perUser = []
     for (var u in $scope.clientConfig.users) {
         $scope.users.push(u);
+	$scope.perUser[u] = 0;
     }
-
-    $scope.since = $routeParams.since;
     
-    var until = moment($scope.since);
+    var until = moment(start);
     until.add('days', 7);
 
     $scope.selectedUsers = {};
@@ -144,24 +186,14 @@ function WeekController($scope, $routeParams, Worklog) {
     var defaultUser = $scope.clientConfig.defaultUser;
     $scope.selectedUsers[defaultUser] = true;
     $scope.fullName = $scope.clientConfig.users[defaultUser];
+    $scope.perUser = {}
 
 
     var scope = $scope;
 
     $scope.updateCounters = function() {
         
-        var f = $scope.issues.filter($scope.issueFilter);
-        $scope.workedIssues = f.length;
-        var seconds = 0;
-        for (var i = 0; i < f.length; ++i) {
-            var issue = f[i];
-            issue.log.forEach(function (item) {
-                if (scope.selectedUsers[item.author] == true && item.timeSpentSeconds) {
-                    seconds = seconds + item.timeSpentSeconds;
-                }
-            });            
-        }
-        $scope.workedSeconds = seconds;
+        //var f = $scope.issues.filter($scope.issueFilter);
     }
 
     $scope.issueFilter = function(issue) {
@@ -192,12 +224,26 @@ function WeekController($scope, $routeParams, Worklog) {
     }
 
     var params = {
-        since: $scope.since, 
+        since: start.toISOString(),
         until: until.toISOString(),
         users: $scope.users.join(',')
     };
     $scope.issues = Worklog.query(params, function() {
-        $scope.updateCounters();
+        $scope.workedIssues = $scope.issues.length;
+        var seconds = 0;        
+        for (var i = 0; i < $scope.issues.length; ++i) {
+            var issue = $scope.issues[i];
+            issue.log.forEach(function (item) {
+
+		if (item.timeSpentSeconds)
+		{
+		    var current = $scope.perUser[item.author] || 0;
+		    $scope.perUser[item.author] = current + item.timeSpentSeconds;
+		    seconds = seconds + item.timeSpentSeconds;
+                }
+            });            
+        }
+	$scope.workedSeconds = seconds;
     });
 }
 

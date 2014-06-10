@@ -54,6 +54,64 @@ html {
     margin: 24px 0px 24px 24px;
 }
 
+.header {
+    position: relative;
+}
+
+.header .name {
+    display: inline-block;
+}
+
+.week-navigator {
+    position: absolute;
+    left: -60px;
+    width: 60px;
+    top: 107px;
+    border: 0px solid;
+    border-radius: 5px;
+}
+
+.week-navigator i {
+    opacity: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 24.5px
+}
+
+.header:hover .week-navigator i {
+    opacity: 1;
+}
+
+.week-navigator:hover i {
+    opacity: 1;
+}
+
+.header > .counter {
+
+    position: relative;
+
+    margin: 10px;    
+    padding-top: 19px;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: auto;
+    
+}
+
+.header > .counter > strong {
+    font-size: 38.5px;
+    line-height: 40px;
+}
+
+.header > .counter > p {
+    line-height: 40px;
+    padding-top: 0px;
+}
+
+.header h1 {
+    padding-top: 20px;
+}
+
 .user-list {
 //    border: solid 1px #333333;
     // margin-left: 29px;
@@ -61,17 +119,26 @@ html {
 //    -webkit-box-sizing: border-box;
 //    -moz-box-sizing: border-box;
 //    box-sizing: border-box;
-    margin: 0 0 0 0;
+//    margin: 0 0 0 0;
+}
+
+
+.name2 {
+    display: inline-block;
+    border: 1px solid;
+//    vertical-align: top;
 }
 
 .counter strong {
     font-size: 48px;
 }
 
+
+
 .counter p {
     /* border-top: solid 1px #333333; */
     margin-top: 0px;
-    padding-top: 8px;
+    padding-top: 10px;
     opacity: 0.6;
 }
 
@@ -284,6 +351,63 @@ h1 span a.icon-question-sign:hover {
     background-color: #8fb8cc;
 }
 
+.timesheet-table th {
+    padding-top: 0px;
+}
+
 .timesheet-leaf {
     cursor: pointer;
 }
+
+div.report div {
+    font-family: Helvetica, Arial, "Droid Sans", sans-serif;
+    font-size: 14px;
+    line-height: 1.428571em;
+}
+
+.nav-pills > li > a {
+    background-color: #eeeeee;
+}
+
+.content {
+    clear: both;
+    margin-top: 40px;
+}
+
+.counter3 {
+}
+
+div.counter2 {
+    font-size: 38.5px;
+    line-height: 40px;   
+    border: 1px solid red;
+    display: inline-block;
+    width: 118px;
+
+    text-align: center;
+    border: solid 1px #333333;
+
+    -webkit-border-radius:24px;
+    -moz-border-radius: 24px;
+    -o-border-radius: 24px;
+    border-radius: 24px;
+    background-color: #f5f5f5;    
+
+    //padding: 32px 12px 0px 12px;
+    margin: 24px 0px 24px 24px;
+
+}
+
+.counter2 h1 {
+    margin-bottom: 0px;
+    line-height: 40px;
+}
+
+.counter2 small {
+    font-size: 14px;
+    color: rgb(51, 51, 51);
+    line-height: 40px;
+    color: #999999;
+}
+
+

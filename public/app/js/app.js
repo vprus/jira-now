@@ -14,7 +14,13 @@ angular.module('jiraNow', ['ngRoute', 'jiraNow.filters', 'jiraNow.services', 'ji
                     return '/personal/week/' + week;
                 }
             });
-            $routeProvider.when('/week/since/:since', {templateUrl: 'partials/week.jade'});
+            $routeProvider.when('/team/week/:week', {templateUrl: 'partials/week.jade'});
+            $routeProvider.when('/team', {
+                redirectTo: function(params, location, search) {
+                    var week = moment().startOf('isoWeek').format('YYYY-MM-DD');
+                    return '/team/week/' + week;
+                }
+            });	    
             $routeProvider.when('/sprint/:sprintId', {templateUrl: 'partials/sprint.jade'});
             $routeProvider.otherwise({redirectTo: '/home'});
         }])

@@ -1,40 +1,42 @@
 div(ng-controller='PersonalController')
   
-  div.span12      
+  div.span12
 
-   h1 {{fullName}} 
-       small Week of {{week | date:'yyyy-MM-d'}} 
+   div.header
+ 
+       div.name	   
+        h1 {{fullName}} 
+         br
+         small 
+             div.week-navigator
+                 a(href="#/personal/week/{{previousWeek}}")
+                   i.fa.fa-chevron-left
+                 a(href="#/personal/week/{{nextWeek}}")
+                   i.fa.fa-chevron-right
+             span Week of {{week | date:'yyyy-MM-dd'}}
 
-     //- 
-       div.dropdown(id='week-dropdown')
-           small Week of {{week | date:'yyyy-M-d'}} 
-               a.dropdown-toggle(data-toggle='dropdown', data-target='week-dropdown')
-                 span.caret.week-dropdown
-           ul.dropdown-menu(role='menu')
-              li This week
-              li That week
+       div.counter2
+           h1 {{workedSeconds|formatHours}}
+           small hours
+
+       div.counter2
+           h1 {{workedIssues}}
+           small issues
 
    span {{error}}
-
-   div.counter
-      strong {{workedSeconds|formatHours}}
-      p hours
-
-   div.counter
-      strong {{workedIssues}}
-      p issues
-
-   ul.nav.nav-pills
+   
+   div.content
+     ul.nav.nav-pills
       li.active
          a(href='#automatic-report', data-toggle='tab') List
       li
          a(href='#timesheet', data-toggle='tab') Timesheet
-      //- li
-         a(href='#') Written Report
+      li
+         a(href='#report', data-toggle='tab') Report
 
    div.tab-content
     div.tab-pane.active(id='automatic-report')
-      div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true").span12
+      div(ng-repeat="issue in issues | filter:reportIssueFilter | orderBy:issueWorkedSeconds:true").span12
 
           b
              a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
@@ -52,6 +54,24 @@ div(ng-controller='PersonalController')
 
        timesheet(data='issues', start='start', user='user')
  
-    div.tab-pane(id='written-report')
+    div.report.tab-pane(id='report')
 
-        p This great functionality is not yet implemented
+       div
+           span(style="text-decoration:underline")
+              strong Week of {{week | date:'yyyy-MM-d'}}
+       div
+           br              
+
+       div
+           strong Engineering
+ 
+       div.row
+        div.span12
+         ul
+          li(ng-repeat="issue in issues | filter:reportIssueFilter | orderBy:issueWorkedSeconds:true")
+           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}} 
+           {{issue.summary}} - 
+           span(ng-repeat="log in issue.log | filter:reportLogFilter") {{log.comment}} 
+
+
+

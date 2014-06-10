@@ -15,29 +15,40 @@ div(ng-controller='WeekController')
          li
            a(href='#') Sprint start
 
+   div.span12.header
+ 
+       div.name	   
+        h1 {{clientConfig.name}}		
+         br
+         small 
+             div.week-navigator
+                 a(href="#/team/week/{{previousWeek}}")
+                   i.fa.fa-chevron-left
+                 a(href="#/team/week/{{nextWeek}}")
+                   i.fa.fa-chevron-right
+             span Week of {{week | date:'yyyy-MM-dd'}}
+
+       div.counter2
+           h1 {{workedSeconds|formatHours}}
+           small hours
+
+       div.counter2
+           h1 {{workedIssues}}
+           small issues
+
     div.span12
     //- p.span12.pagination-centered
     //-   b Select user
-    ul.nav.nav-pills.pull-right.user-list
+
+
+  div.content.span12
+   
+   ul.nav.nav-pills.user-list
       li(ng-repeat="user in users")(ng-class="{active: selectedUsers[user] == true}")
-        a(ng-click="select(user)") {{user}}
+        a(ng-click="select(user)") {{user}}: {{perUser[user]|formatHours}}
 
-  
-  div.span12      
 
-   div.person
-      p {{fullName}}
-      p Since {{since | date:'MMM d H:mm'}}
-
-   div.counter
-      strong {{workedSeconds|formatHours}}
-      p hours
-
-   div.counter
-      strong {{workedIssues}}
-      p issues
-
-  div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true").span12
+   div(ng-repeat="issue in issues | filter:issueFilter | orderBy:issueTotalHours:true")
 
     b
       a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}

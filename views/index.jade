@@ -20,19 +20,9 @@ block content
              ul.dropdown-menu
                li(ng-repeat='sprint in clientConfig.sprints')
                  a(href='#/sprint/{{sprint.id}}') {{sprint.name}}
-           li.dropdown.ng-cloak(ng-show='clientConfig.users', data-match-route='/week/.*')
-             a(href='#', data-toggle='dropdown').dropdown-toggle Week 
-               b.caret
-             ul.dropdown-menu               
-               li 
-                 a(href='#/week/since/{{monday.toISOString()}}') Since Monday ({{monday | date: 'MMM d'}})
-               li
-                 a(href='#/week/since/{{teamCall.toISOString()}}') Since Team Call ({{teamCall | date: 'MMM d'}})
-               li.divider
-               li 
-                 a(href='#/week/since/{{previousMonday.toISOString()}}') Since Previous Monday ({{previousMonday | date: 'MMM d'}})
-               li
-                 a(href='#/week/since/{{previousTeamCall.toISOString()}}') Since Previous Team Call ({{previousTeamCall | date: 'MMM d'}})
+
+            li.ng-cloak(data-match-route='/team/.*')
+              a(href="#/team") Team
 
             li.ng-cloak(ng-show='session.username', data-match-route='/personal/.*')
               a(href="#/personal") Personal
