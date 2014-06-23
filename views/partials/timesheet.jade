@@ -20,7 +20,8 @@ table.table.timesheet-table(ng-class="{disabled: updating == 1 || updatingList =
 
     tbody
       tr(ng-repeat='issue in issues', ng-switch="1") 
-        td {{issue.summary}}
+        td
+          a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.summary}}
         td.timesheet-leaf(ng-click="timesheetSelect($event, issue.key, 1)") {{issue.perDay[1]|formatHoursPreciseNz}}
         td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 2)") {{issue.perDay[2]|formatHoursPreciseNz}}
         td.timesheet-leaf(ng-click="timesheetSelect($event,issue.key, 3)") {{issue.perDay[3]|formatHoursPreciseNz}}
