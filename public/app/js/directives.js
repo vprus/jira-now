@@ -147,12 +147,8 @@ angular.module('jiraNow.directives', ['ng'])
 		    thisDay.add('days', i);
 		    scope.dates.push(thisDay.date());
 		}
-
-
-		console.log("Link function");
 		
 		scope.$watch('data', function(issues, oldValue) {
-		    console.log("Data updated");
 
 		    scope.count = issues.length;
 		    scope.updates = scope.updates + 1;
@@ -176,8 +172,6 @@ angular.module('jiraNow.directives', ['ng'])
 				scope.dayTotal[day] = scope.dayTotal[day] + item.timeSpentSeconds;
 			    }
 			});  
-			console.log("Per day " + issue.key + " : " + issue.perDay);
-
 		    }
 		    scope.workedSeconds = seconds;
 		    scope.issues = issues.filter(function(issue) { return issue.total > 0; });
