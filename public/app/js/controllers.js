@@ -245,6 +245,26 @@ function WeekController($scope, $routeParams, Worklog) {
         }
 	$scope.workedSeconds = seconds;
     });
+
+    $scope.pillClass = function(user) {
+        var result = [];
+        if ($scope.selectedUsers[user] == true) {
+            result.push("active");
+        }
+
+        if ($scope.workedIssues != 0) {
+
+            var hours = ($scope.perUser[user] || 0)/60/60;
+            if (hours < 10) {
+                result.push("badHours");
+            } else if (hours < 20) {
+                result.push("doubtfulHours");
+            } else {
+                result.push("goodHours");
+            }
+        }
+        return result;
+    }
 }
 
 function ListController($scope, $routeParams, List, $cookies)

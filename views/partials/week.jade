@@ -44,7 +44,7 @@ div(ng-controller='WeekController')
   div.content.span12
    
    ul.nav.nav-pills.user-list
-      li(ng-repeat="user in users")(ng-class="{active: selectedUsers[user] == true}")
+      li(ng-repeat="user in users")(ng-class="pillClass(user)")
         a(ng-click="select(user)") {{user}}: {{perUser[user]|formatHours}}
 
 

@@ -369,6 +369,24 @@ div.report div {
     background-color: #eeeeee;
 }
 
+li.badHours > a {
+    color: red;
+}
+
+li.badHours.active > a {
+    color: white;
+    background-color: red;
+}
+
+li.doubtfulHours > a {
+    color: orange;
+}
+
+li.doubtfulHours.active > a {
+    color: white;
+    background-color: orange;
+}
+
 .content {
     clear: both;
     margin-top: 40px;
