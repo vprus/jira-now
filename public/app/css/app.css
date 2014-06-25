@@ -369,23 +369,37 @@ div.report div {
     background-color: #eeeeee;
 }
 
-li.badHours > a {
+.nav-pills > .badHours > a {
     color: red;
 }
 
-li.badHours.active > a {
+.nav-pills > .badHours:hover > a {
+    color: darkRed;
+}
+
+.nav-pills > .badHours.active > a,
+.nav-pills > .badHours.active:hover > a
+{
     color: white;
     background-color: red;
 }
 
-li.doubtfulHours > a {
+.nav-pills > .doubtfulHours > a {
     color: orange;
 }
 
-li.doubtfulHours.active > a {
+.nav-pills > .doubtfulHours:hover > a {
+    color: darkOrange;
+}
+
+.nav-pills > .doubtfulHours.active > a,
+.nav-pills > .doubtfulHours.active:hover > a
+{
     color: white;
     background-color: orange;
 }
+
+
 
 .content {
     clear: both;
