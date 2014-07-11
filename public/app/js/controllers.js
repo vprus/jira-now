@@ -434,9 +434,14 @@ function SprintController($scope, $routeParams, $cookies, Sprint)
     }
 
     var now = new Date();
+    var start = new Date($scope.sprint.start);
     var end = new Date($scope.sprint.end);
    
-    $scope.inProgress = (now.getTime() < end.getTime());
+    $scope.relationToNow = 0;
+    if (start.getTime() > now.getTime())
+        $scope.relationToNow = 1;
+    if (end.getTime() < now.getTime())
+        $scope.relationToNow = -1;
     
     function updateSprint()
     {

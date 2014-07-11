@@ -1,13 +1,20 @@
 div(ng-controller='SprintController').sprint
 
-  span(class='list-header')
-    h1 {{sprint.name}} 
-      span(ng-cloak, ng-show='inProgress', class='description') In Progress &mdash; 
-      span(class='description') {{sprint.start | date:'MMM d H:mm'}} to {{sprint.end | date:'MMM d H:mm'}}
+ div.span12
 
-      span(style='float: right') 
-        a(toggle='showHelp', class='icon-question-sign', href='#')
-
+  div.header
+    div.name
+      h1 
+       span(style='float: right') 
+         a(toggle='showHelp', class='icon-question-sign', href='#')
+       span {{sprint.name}}
+        br
+        small(ng-switch="relationToNow")
+          span(ng-switch-when="-1") Completed &mdash; 
+          span(ng-switch-when="0") In Progress &mdash; 
+          span(ng-switch-when="1") Planned &mdash; 
+        small {{sprint.start | date:'MMM d'}} to {{sprint.end | date:'MMM d'}}
+   
     div(ng-cloak, ng-show='showHelp', class='help')
 
         p Shows all issues with logged time during the sprint timeframe, as well as 
@@ -22,7 +29,7 @@ div(ng-controller='SprintController').sprint
     thead(ng-show='!updatingSprint')
       tr
         th Issue
-        th {{inProgress|iif : "Status so far" : "Status at sprint end"}}
+        th {{(relationToNow==0)|iif : "Status so far" : "Status at sprint end"}}
         th Effort
 
     tbody
