@@ -33,14 +33,14 @@ table.table.timesheet-table(ng-class="{disabled: updating == 1 || updatingList =
 
       tr
        td Day total
-       td {{dayTotal[1]|formatHours}} 
-       td {{dayTotal[2]|formatHours}} 
-       td {{dayTotal[3]|formatHours}} 
-       td {{dayTotal[4]|formatHours}} 
-       td {{dayTotal[5]|formatHours}} 
-       td {{dayTotal[6]|formatHours}} 
-       td {{dayTotal[0]|formatHours}}
-       td {{workedSeconds|formatHours}} 
+       td {{dayTotal[1]|formatHoursPreciseNz}}
+       td {{dayTotal[2]|formatHoursPreciseNz}}
+       td {{dayTotal[3]|formatHoursPreciseNz}}
+       td {{dayTotal[4]|formatHoursPreciseNz}}
+       td {{dayTotal[5]|formatHoursPreciseNz}}
+       td {{dayTotal[6]|formatHoursPreciseNz}}
+       td {{dayTotal[0]|formatHoursPreciseNz}}
+       td {{workedSeconds|formatHoursPreciseNz}}
 
 li(ng-repeat="log in timesheetCellDetails") 
            span(ng-show="log.timeSpentSeconds")          
