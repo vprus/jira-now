@@ -296,7 +296,10 @@ function ListController($scope, $routeParams, List, $cookies)
 
         var users = {}
         issues.forEach(function(issue) {
-            var name = issue.fields.assignee.name;
+            var name;
+            if (issue.fields.assignee) {
+                name = issue.fields.assignee.name;
+            }
             if (!name) {
                 name = "none";
             }
