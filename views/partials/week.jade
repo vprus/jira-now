@@ -28,13 +28,15 @@ div(ng-controller='WeekController')
                    i.fa.fa-chevron-right
              span Week of {{week | date:'yyyy-MM-dd'}}
 
-       div.counter2
-           h1 {{workedSeconds|formatHours}}
-           small hours
 
-       div.counter2
-           h1 {{workedIssues}}
-           small issues
+       div.counters 
+         div.counter2
+               h1 {{workedSeconds|formatHours}}
+               small hours
+
+         div.counter2
+               h1 {{workedIssues}}
+               small issues
 
     div.span12
     //- p.span12.pagination-centered

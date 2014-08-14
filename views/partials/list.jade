@@ -1,11 +1,17 @@
 div(ng-controller='ListController').issue-list
 
-  span(class='list-header')
-    h1 {{list.name}}
-      span(ng-cloak, ng-show='list.description', class='description')  {{list.description}}
-      span(style='float: right') 
-        a(toggle='showHelp', class='icon-question-sign', href='#')
-    span(ng-cloak, ng-show='list.help && showHelp', class='help') {{list.help}}
+  div.header
+ 
+    div.name           
+      h1 {{list.name}}               
+        br 
+        small &#8203;
+           span(ng-cloak, ng-show='list.description', class='description')  {{list.description}}
+
+    div.counters 
+      div.counter2
+        h1 {{estimate|formatHours}}
+        small hours
 
   div.list-users(ng-show='list.users', ng-class='{disabled: updating == 1 || updatingList == 1}')
     div(class="left")  

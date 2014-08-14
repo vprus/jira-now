@@ -33,6 +33,12 @@ html {
   padding: 0;
 }
 
+div.counters {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+}
+
 .counter {
     display: inline-block;
     text-align: center;
@@ -211,6 +217,7 @@ body {
     display: inline-block;
     vertical-align: top;
     height: 18px;
+    clear: both;
 }
 
 .list-users .badge {
@@ -436,9 +443,14 @@ div.counter2 {
 
 }
 
+.issue-list > .header {
+    margin-left: 0;
+}
+
 .counter2 h1 {
     margin-bottom: 0px;
     line-height: 40px;
+    padding-top: 19px;
 }
 
 .counter2 small {

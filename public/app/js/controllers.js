@@ -360,6 +360,14 @@ function ListController($scope, $routeParams, List, $cookies)
             if (list.users != false) {
                 $scope.counts = $scope.updateCounts($scope.issues);
             }
+
+            $scope.estimate = 0;
+            issues.forEach(function(issue) {
+                if (issue.fields.timetracking.remainingEstimateSeconds) {
+                    $scope.estimate += issue.fields.timetracking.remaingEstimateSeconds;
+                }
+            });
+            
         });
     }
     updateIssues();

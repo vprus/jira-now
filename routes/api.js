@@ -177,7 +177,8 @@ function queryMinimal(query, callback)
     maxResults = 500;
     var options = {
         maxResults: 500, 
-        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", "aggregatetimespent", config.jira.whiteboardFieldId],
+        fields: ["id", "key", "updated", "summary", "priority", "assignee", "fixVersions", 
+                 "timetracking", "aggregatetimespent", config.jira.whiteboardFieldId],
     }
     jira.searchJira(query, options, function(error, jd) {
 
