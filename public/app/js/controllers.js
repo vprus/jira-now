@@ -365,9 +365,9 @@ function ListController($scope, $routeParams, List, $cookies)
             }
 
             $scope.estimate = 0;
-            issues.forEach(function(issue) {
+            $scope.issues.forEach(function(issue) {
                 if (issue.fields.timetracking.remainingEstimateSeconds) {
-                    $scope.estimate += issue.fields.timetracking.remaingEstimateSeconds;
+                    $scope.estimate += issue.fields.timetracking.remainingEstimateSeconds;
                 }
             });
             
