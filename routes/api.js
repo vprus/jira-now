@@ -721,6 +721,9 @@ exports.changes = function(req, res) {
         res.send(400, {error: "The 'since' query parameter is required"});
         return;
     }
+
+    var t = process.hrtime();
+
     var users = req.query.user;
     var since = new Date(req.query.since);
     var until = new Date(req.query.until);
@@ -776,6 +779,9 @@ exports.changes = function(req, res) {
     var result = [];
     comments.each(function(err, issue) {
         if (issue == null) {
+            t = process.hrtime(t);
+            millis = t[1] / 1000000;
+            console.log("API changes call took " + t[0] + "." + millis.toFixed() + " seconds.");
             res.json(result);
         } else {
             var log = []
