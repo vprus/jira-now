@@ -21,6 +21,7 @@ angular.module('jiraNow', ['ngRoute', 'jiraNow.filters', 'jiraNow.services', 'ji
                     return '/team/week/' + week;
                 }
             });	    
+            $routeProvider.when('/team/weekly-times', {templateUrl: 'partials/weekly-times.jade'});
             $routeProvider.when('/sprint/:sprintId', {templateUrl: 'partials/sprint.jade'});
             $routeProvider.otherwise({redirectTo: '/home'});
         }])

@@ -447,6 +447,10 @@ div.counter2 {
     margin-left: 0;
 }
 
+.counter2 a:hover {
+    text-decoration: none;
+}
+
 .counter2 h1 {
     margin-bottom: 0px;
     line-height: 40px;

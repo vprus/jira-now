@@ -267,6 +267,74 @@ function WeekController($scope, $routeParams, Worklog) {
     }
 }
 
+function WeeklyTimesController($scope, $routeParams, Worklog) {
+
+    var users = []
+    for (var u in $scope.clientConfig.users) {
+        users.push(u);
+    }
+
+    var since = moment("2012-01-01");
+    var until = moment();
+
+
+    var params = {
+        since: since.toISOString(),
+        until: until.toISOString(),
+        users: users.join(',')
+    };
+
+    var raw = Worklog.query(params, function() {
+        
+        var data = [];
+        raw.forEach(function(issue) {
+            if (issue.log)
+                issue.log.forEach(function(entry) {
+                    if (entry.timeSpentSeconds) {
+                        data.push({a: entry.author, d: new Date(entry.date), t: entry.timeSpentSeconds});
+                    }
+                })
+        });
+        
+
+        var facts = crossfilter(data);
+
+        // Create dataTable dimension
+        var workByDate = facts.dimension(function (d) {
+            return d.d;
+        });
+        
+        var workByDateWeekly = workByDate
+            .group(function(date) {
+                return moment(date).startOf('isoWeek').toDate();
+            })
+            .reduceSum(function(entry) { 
+                return entry.t/60/60/8/5; 
+            });
+
+        var timesChart = dc.barChart("#times-chart");
+        
+        timesChart.width(1140)
+            .height(150)
+            .margins({top: 10, right: 10, bottom: 20, left: 40})
+            .dimension(workByDate)
+            .group(workByDateWeekly)
+            .transitionDuration(500)
+            .centerBar(true)	
+            .gap(1)
+            .filter([3, 5])
+            .x(d3.time.scale().domain([since.toDate(), until.toDate()]).nice(d3.time.day))
+            .xUnits(d3.time.weeks)        
+            .elasticY(true)
+            .xAxis().tickFormat();
+        timesChart.xAxis().tickFormat(d3.time.format("%Y-%m-%d"));
+        
+
+        dc.renderAll();
+    });
+}
+
+
 function ListController($scope, $routeParams, List, $cookies)
 {
     var listId = $routeParams.listId;
