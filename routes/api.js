@@ -141,8 +141,13 @@ function queryAndSaveIssues(query, callback)
                             issue.fields.comment.comments.forEach(fixDates);
                             issue.fields.worklog.worklogs.forEach(fixDates);
                             issue.changelog.histories.forEach(fixDates);
+                            // If issue with this _id does not exist yet, and
+                            // has to be inserted, MongoDB will pick _id from
+                            // query. We don't need, and are not allowed to include
+                            // it in $set, since _id is not mutable, and $setOnInsert
+                            // is only added in 2.4
                             issues.update({_id: issue.id}, 
-                                          {'$set': issue, '$setOnInsert': {_id: issue.id}}, 
+                                          {'$set': issue}, 
                                           {safe: true, upsert: true}, 
                                           callback);
                         }
