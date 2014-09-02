@@ -922,7 +922,6 @@ exports.sprint = function(req, res) {
                         res.send(400, error.toString());
 
                     cursor.each(function(err, d) {
-                        console.log(JSON.stringify(d));
                         if (d) {
                             if (d.plusses) {
                                 key2issue[d.key].plusses = d.plusses;
