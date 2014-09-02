@@ -131,21 +131,20 @@ function queryAndSaveIssues(query, callback)
             var queryTasks = jd.issues.map(function(minIssue) {
                 
                 return function(callback) {
+                    console.log("Updating " + minIssue.key + "/" + minIssue.id);
                     jira.findIssue(minIssue.id + "?expand=changelog", function(error, issue) {
                         if (error) {
-                            console.log("Error getting details on " + minIssue.key);
+                            console.log("Error getting details on " + minIssue.id + ": " + error.toString());
                             callback(error, null);
                         } else {
-                            if (issue.key == "CB-2404") {
-                                console.log("!!!!! " + JSON.stringify(issue, null, 4));
-                            }
-                            issue._id = issue.id;
                             fixDates(issue.fields);
                             issue.fields.comment.comments.forEach(fixDates);
                             issue.fields.worklog.worklogs.forEach(fixDates);
                             issue.changelog.histories.forEach(fixDates);
-                            issues.update({_id: issue.id}, {'$set': issue}, {safe: true, upsert: true}, callback);
-                            console.log("Updated " + issue.key);
+                            issues.update({_id: issue.id}, 
+                                          {'$set': issue, '$setOnInsert': {_id: issue.id}}, 
+                                          {safe: true, upsert: true}, 
+                                          callback);
                         }
                     });
                 }
