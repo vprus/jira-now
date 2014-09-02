@@ -49,7 +49,7 @@ function AppController($scope, $http, $timeout, $cookies, sprintSchedule) {
         if (!time)
             return "Never updated";
 
-        return "Updated " + moment(time).from(Math.round(new Date().getTime()));
+        return "Updated " + moment(time).fromNow();
     }
 
     function updateTimes()
