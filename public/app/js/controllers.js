@@ -492,7 +492,7 @@ function ListController($scope, $routeParams, List, $cookies)
     }
 }
 
-function SprintController($scope, $routeParams, $cookies, Sprint)
+function SprintController($scope, $routeParams, $cookies, $http, Sprint)
 {
     var helpId = "showHelp_sprint";
     var cookie = $cookies[helpId];
@@ -542,6 +542,31 @@ function SprintController($scope, $routeParams, $cookies, Sprint)
             return issue.whiteboard;
         } else {
             return "Unknown";
+        }
+    }
+
+    $scope.plus_button_class = function(issue) {
+        var user = $scope.session.username;
+        if (user && issue.plusses && issue.plusses.indexOf(user) != -1)
+            return "plussed";
+    }
+
+    $scope.plus = function(issue) {
+        var user = $scope.session.username;
+        if (user) {
+            var add;
+            if (issue.plusses === undefined) {
+                issue.plusses = [];
+            }
+            var index = issue.plusses.indexOf(user);
+            if (index != -1) {
+                add = 0;
+                issue.plusses.splice(index, 1)
+            } else {
+                add = 1;
+                issue.plusses.push(user);
+            }
+            $http.post("api/plus?key=" + issue.key + "&user=" + user + "&add=" + add);
         }
     }
 

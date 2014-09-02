@@ -35,8 +35,11 @@ div(ng-controller='SprintController').sprint
     tbody
       tr(ng-repeat='issue in sprint.workedIssues')
         td 
+          div.plus(ng-cloak, ng-if="issue.plusses && issue.plusses.length") +{{issue.plusses.length}}  
           a(href='http://jira.alm.mentorg.com:8080/browse/{{issue.key}}') {{issue.key}}
           | : {{issue.summary}} 
+          a.plus(ng-cloak, ng-show="session.username", ng-class='plus_button_class(issue)', ng-click='plus(issue)') 
+            i.fa.fa-thumbs-up
         td(sprint-end-status="issue",sprint='sprint')
         td {{issue.timeSpent|formatDuration}}
 

@@ -144,7 +144,7 @@ function queryAndSaveIssues(query, callback)
                             issue.fields.comment.comments.forEach(fixDates);
                             issue.fields.worklog.worklogs.forEach(fixDates);
                             issue.changelog.histories.forEach(fixDates);
-                            issues.update({_id: issue.id}, issue, {safe: true, upsert: true}, callback);
+                            issues.update({_id: issue.id}, {'$set': issue}, {safe: true, upsert: true}, callback);
                             console.log("Updated " + issue.key);
                         }
                     });
@@ -912,10 +912,61 @@ exports.sprint = function(req, res) {
             if (document == null) {
                 res.send(500, "The sprint does not exist");
             } else {
-                res.send(document);
+                var key2issue = {}
+                document.workedIssues.forEach(function(issue) {
+                    key2issue[issue.key] = issue;
+                });
+                var keys = document.workedIssues.map(function(issue) { return issue.key; });
+                issues.find({key: {'$in': keys}}, {key: 1, plusses: 1}, function(error, cursor) {
+                    if (error)
+                        res.send(400, error.toString());
+
+                    cursor.each(function(err, d) {
+                        console.log(JSON.stringify(d));
+                        if (d) {
+                            if (d.plusses) {
+                                key2issue[d.key].plusses = d.plusses;
+                            }
+                        }
+                        else {
+                            res.send(document);
+                        }
+                    });
+                });                
             }
         }
     });    
+}
+
+exports.plus = function(req, res) {
+    var key = req.query.key;
+    var user = req.query.user;
+    var add = req.query.add;
+
+    issues.findOne({key: key}, function(error, issue) {
+        if (error) {
+            res.send(500, error);
+        } else {
+            if (!issue.plusses) {
+                issue.plusses = [];
+            }
+            var index = issue.plusses.indexOf(user);
+            if (add) {
+                if (index == -1)
+                    issue.plusses.push(user);
+            } else {
+                if (index != -1)
+                    issue.plusses.split(index, 1);
+            }
+            issues.save(issue, function(error) {
+                if (error) {
+                    res.sent(500, error.toString() + "\n");
+                } else {
+                    res.jon(200, {});
+                }
+            });
+        }
+    });
 }
 
 exports.record_usage = function(req, res) {

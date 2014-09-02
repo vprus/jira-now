@@ -61,6 +61,9 @@ app.get('/api/changes', api.changes)
 app.get('/api/list', api.list)
 app.get('/api/sprint', api.sprint)
 
+
+app.post('/api/plus', api.plus);
+
 app.post('/api/update', api.update)
 app.post('/api/usage', api.record_usage);
 

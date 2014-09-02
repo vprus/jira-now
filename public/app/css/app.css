@@ -464,4 +464,28 @@ div.counter2 {
     color: #999999;
 }
 
+div.sprint table {
+    position: relative;
+}
+
+div.plus {
+    position: absolute;
+    left: -4em;
+    font-weight: bold;
+}
+
+a.plus {
+    display: none;
+    cursor: pointer;
+    color: #333333;
+}
+
+a.plus.plussed {
+    display: inline;
+    color: green;
+}
+
+td:hover a.plus {
+    display: inline;
+}
 
