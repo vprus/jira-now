@@ -962,7 +962,7 @@ exports.plus = function(req, res) {
                 if (error) {
                     res.sent(500, error.toString() + "\n");
                 } else {
-                    res.jon(200, {});
+                    res.json(200, {});
                 }
             });
         }
