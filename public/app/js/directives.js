@@ -19,34 +19,6 @@ angular.module('jiraNow.directives', ['ng'])
         }; 
         return digester; 
     })
-    .directive('lineChart', function() {
-        return {
-            restrict: 'A',
-            scope: { data: '=lineChart' },
-            link: function(scope, element, attrs) {
-                var ctx = element[0].getContext("2d");
-                var chart = new Chart(ctx);
-                chart.Line(scope.data, {});
-            }
-        };
-    })
-    .directive('barChart', function() {
-        return {
-            restrict: 'A',
-            scope: { data: '=barChart' },
-            link: function(scope, element, attrs) {
-                console.log("Linking")
-                var ctx = element[0].getContext("2d");
-                var chart = new Chart(ctx);
-                scope.$watch('data', function(val, oldVal) {
-                    console.log("Drawing bar chart " + val + " " + oldVal);
-                    if (val) {
-                        chart.Bar(val, {});
-                    }
-                });
-            }
-        };
-    })
     .directive('popover', function() {
         return { 
             restrict: 'A',
@@ -62,7 +34,6 @@ angular.module('jiraNow.directives', ['ng'])
             restrict: 'A',
             scope: { variable: '=toggle' },
             link: function(scope, element, attrs) {
-                console.log("TOGGLE");
                 if (scope.variable != true && scope.variable != false) {
                     scope.variable = false;
                 }
